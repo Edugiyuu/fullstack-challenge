@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+  RESERVE
+  RELEASE
+}
+
+enum WalletTransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model Wallet {
+  id            String   @id @default(uuid())
+  playerId      String   @unique
+  balanceCents  BigInt   @default(0)
+  reservedCents BigInt   @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id              String                  @id @default(uuid())
+  walletId        String
+  type            WalletTransactionType
+  status          WalletTransactionStatus @default(PENDING)
+  amountCents     BigInt
+  referenceId     String
+  idempotencyKey  String                  @unique
+  failureReason   String?
+  createdAt       DateTime                @default(now())
+  completedAt     DateTime?
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+
+  @@index([walletId])
+  @@index([referenceId])
+  @@index([status])
+}
