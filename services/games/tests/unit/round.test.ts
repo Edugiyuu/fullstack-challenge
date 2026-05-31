@@ -7,6 +7,10 @@ function createRound(): Round {
   return Round.create({
     id: "round-1",
     crashPoint: 250,
+    serverSeedHash: "server-seed-hash",
+    serverSeed: "server-seed",
+    clientSeed: "client-seed",
+    nonce: 1,
     bettingEndsAt: new Date("2026-05-31T12:00:00.000Z"),
   });
 }
@@ -18,6 +22,10 @@ describe("Round", () => {
     expect(round.id).toBe("round-1");
     expect(round.status).toBe(RoundStatus.BETTING);
     expect(round.crashPoint).toBe(250);
+    expect(round.serverSeedHash).toBe("server-seed-hash");
+    expect(round.serverSeed).toBe("server-seed");
+    expect(round.clientSeed).toBe("client-seed");
+    expect(round.nonce).toBe(1);
     expect(round.bets).toHaveLength(0);
   });
 

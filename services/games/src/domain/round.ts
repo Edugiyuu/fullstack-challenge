@@ -17,6 +17,10 @@ type RoundProps = {
   id: string;
   status: RoundStatus;
   crashPoint: number;
+  serverSeedHash: string;
+  serverSeed?: string;
+  clientSeed?: string;
+  nonce: number;
   bettingEndsAt: Date;
   bets: Bet[];
 };
@@ -24,11 +28,23 @@ type RoundProps = {
 export class Round {
   private constructor(private readonly props: RoundProps) {}
 
-  static create(params: { id: string; crashPoint: number; bettingEndsAt: Date }): Round {
+  static create(params: {
+    id: string;
+    crashPoint: number;
+    serverSeedHash: string;
+    serverSeed?: string;
+    clientSeed?: string;
+    nonce: number;
+    bettingEndsAt: Date;
+  }): Round {
     return new Round({
       id: params.id,
       status: RoundStatus.BETTING,
       crashPoint: params.crashPoint,
+      serverSeedHash: params.serverSeedHash,
+      serverSeed: params.serverSeed,
+      clientSeed: params.clientSeed,
+      nonce: params.nonce,
       bettingEndsAt: params.bettingEndsAt,
       bets: [],
     });
@@ -44,6 +60,22 @@ export class Round {
 
   get crashPoint(): number {
     return this.props.crashPoint;
+  }
+
+  get serverSeedHash(): string {
+    return this.props.serverSeedHash;
+  }
+
+  get serverSeed(): string | undefined {
+    return this.props.serverSeed;
+  }
+
+  get clientSeed(): string | undefined {
+    return this.props.clientSeed;
+  }
+
+  get nonce(): number {
+    return this.props.nonce;
   }
 
   get bettingEndsAt(): Date {
