@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { GamePage } from "./pages/GamePage";
 import { LoginPage } from "./pages/LoginPage";
 
 export function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
-  if (!isLoggedIn) {
-    return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
-  }
-
-  return <GamePage onLogout={() => setIsLoggedIn(false)} />;
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginPage onLogin={() => navigate("/game")} />} />
+      <Route path="/game" element={<GamePage onLogout={() => navigate("/login")} />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
 }

@@ -85,10 +85,10 @@ export function GamePage({ onLogout }: GamePageProps) {
   const canCashout = Boolean(activeBet) && round?.status === "RUNNING";
 
   return (
-    <main className="game-shell">
+    <main className="min-h-screen bg-black text-neutral-100">
       <TopBar wallet={wallet} onLogout={onLogout} />
-      <section className="game-grid">
-        <div className="main-column">
+      <section className="grid gap-5 bg-black p-4 md:p-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="grid gap-5">
           <FlightPanel round={round} />
           <BetControls
             autoCashout={autoCashout}
@@ -106,7 +106,7 @@ export function GamePage({ onLogout }: GamePageProps) {
           />
         </div>
 
-        <aside className="side-column">
+        <aside className="grid content-start gap-5">
           <LiveBetsPanel liveBets={liveBets} />
           <HistoryPanel history={history} />
         </aside>

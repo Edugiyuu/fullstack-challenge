@@ -18,9 +18,9 @@ export function getStatusLabel(status: string) {
 }
 
 export function getHistoryClass(value: number) {
-  if (value < 150) return "history-item low";
-  if (value < 300) return "history-item mid";
-  return "history-item high";
+  if (value < 150) return "bg-red-700";
+  if (value < 300) return "bg-neutral-800";
+  return "bg-green-700";
 }
 
 export function toErrorMessage(error: unknown) {

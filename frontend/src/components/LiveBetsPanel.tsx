@@ -8,13 +8,13 @@ type LiveBetsPanelProps = {
 
 export function LiveBetsPanel({ liveBets }: LiveBetsPanelProps) {
   return (
-    <section className="side-card">
-      <div className="side-title">
-        <Users size={18} />
+    <section className="rounded-lg border border-neutral-800 bg-black p-4">
+      <div className="mb-4 flex items-center gap-2 text-sm font-bold text-white">
+        <Users className="text-green-500" size={18} />
         <h2>Apostas ao Vivo</h2>
-        <span>{liveBets.length}</span>
+        <span className="ml-auto rounded-md bg-green-950 px-2 py-1 text-xs text-green-400">{liveBets.length}</span>
       </div>
-      <div className="live-list">
+      <div className="space-y-2">
         {liveBets.map((bet, index) => (
           <LiveBetRow bet={bet} key={`${bet.betId ?? bet.id ?? bet.playerId}-${index}`} />
         ))}
@@ -28,15 +28,19 @@ function LiveBetRow({ bet }: { bet: LiveBet }) {
   const isLost = bet.status === "LOST";
 
   return (
-    <div className={`live-row ${isCashed ? "cashed" : ""} ${isLost ? "lost" : ""}`}>
-      <span className="player-name">
-        <CircleDollarSign size={14} />
+    <div
+      className={`grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-3 rounded-md px-3 py-3 text-xs ${
+        isCashed ? "bg-green-600 text-white" : isLost ? "bg-red-950 text-red-100" : "bg-neutral-950 text-neutral-300"
+      }`}
+    >
+      <span className="flex min-w-0 items-center gap-2 font-semibold">
+        <CircleDollarSign className={isCashed ? "text-white" : "text-green-500"} size={14} />
         {bet.playerId}
       </span>
       <span>{formatCurrency(bet.amountCents)}</span>
-      {isCashed && <strong>{formatMultiplier(bet.cashoutMultiplier ?? 100)}</strong>}
+      {isCashed && <strong className="rounded bg-green-900 px-2 py-1">{formatMultiplier(bet.cashoutMultiplier ?? 100)}</strong>}
       {isCashed && <span>{formatCurrency(bet.payoutCents ?? "0")}</span>}
-      {!isCashed && <em>{isLost ? "Perdeu" : "Ativo"}</em>}
+      {!isCashed && <em className="rounded bg-amber-500/20 px-2 py-1 font-bold not-italic text-amber-300">{isLost ? "Perdeu" : "Ativo"}</em>}
     </div>
   );
 }

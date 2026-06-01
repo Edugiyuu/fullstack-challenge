@@ -11,16 +11,19 @@ type TopBarProps = {
 
 export function TopBar({ wallet, onLogout }: TopBarProps) {
   return (
-    <header className="topbar">
+    <header className="flex flex-col gap-4 bg-black px-5 py-4 md:flex-row md:items-center md:justify-between md:px-8">
       <Brand />
-      <div className="account-bar">
-        <button className="user-pill" onClick={onLogout}>
+      <div className="flex flex-wrap gap-3">
+        <button
+          className="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-neutral-600"
+          onClick={onLogout}
+        >
           <CircleDollarSign size={16} />
           {PLAYER_ID}
         </button>
-        <div className="balance-pill">
+        <div className="flex items-center gap-2 rounded-lg border border-green-600 bg-green-950/20 px-4 py-2 text-sm text-neutral-200">
           <Banknote size={16} />
-          Saldo: <strong>{formatCurrency(wallet?.balanceCents ?? "0")}</strong>
+          Saldo: <strong className="text-green-400">{formatCurrency(wallet?.balanceCents ?? "0")}</strong>
         </div>
       </div>
     </header>
