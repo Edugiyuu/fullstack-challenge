@@ -2,7 +2,8 @@ import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import { InsufficientFundsError } from "../domain/errors";
 import { Money } from "../domain/money";
-import { WALLET_REPOSITORY, type WalletRepository } from "./wallet-repository";
+import { WALLET_REPOSITORY } from "./wallet-repository";
+import type { WalletRepository } from "./wallet-repository";
 
 export type ReserveWalletBalanceCommand = {
   idempotencyKey: string;

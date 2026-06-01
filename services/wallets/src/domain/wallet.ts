@@ -20,6 +20,20 @@ export class Wallet {
     });
   }
 
+  static rehydrate(params: {
+    id: string;
+    playerId: string;
+    balanceCents: bigint | number;
+    reservedCents: bigint | number;
+  }): Wallet {
+    return new Wallet({
+      id: params.id,
+      playerId: params.playerId,
+      balance: Money.fromCents(params.balanceCents),
+      reserved: Money.fromCents(params.reservedCents),
+    });
+  }
+
   get id(): string {
     return this.props.id;
   }

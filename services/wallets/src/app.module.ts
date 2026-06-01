@@ -1,18 +1,24 @@
 import { Module } from "@nestjs/common";
+import { CreateWalletUseCase } from "./application/create-wallet.use-case";
+import { GetWalletUseCase } from "./application/get-wallet.use-case";
 import { ReserveWalletBalanceUseCase } from "./application/reserve-wallet-balance.use-case";
 import { WALLET_REPOSITORY } from "./application/wallet-repository";
-import { InMemoryWalletRepository } from "./infrastructure/in-memory-wallet.repository";
+import { PrismaService } from "./infrastructure/prisma.service";
+import { PrismaWalletRepository } from "./infrastructure/prisma-wallet.repository";
 import { RabbitMqWalletReservationConsumer } from "./infrastructure/rabbitmq-wallet-reservation.consumer";
 import { WalletsController } from "./presentation/controllers/wallets.controller";
 
 @Module({
   controllers: [WalletsController],
   providers: [
+    PrismaService,
+    CreateWalletUseCase,
+    GetWalletUseCase,
     ReserveWalletBalanceUseCase,
     RabbitMqWalletReservationConsumer,
     {
       provide: WALLET_REPOSITORY,
-      useClass: InMemoryWalletRepository,
+      useClass: PrismaWalletRepository,
     },
   ],
 })
