@@ -1,19 +1,24 @@
 import { useState } from "react";
 import { Lock, Rocket, ShieldCheck } from "lucide-react";
-import { createWallet } from "../lib/api";
+import { useAuth } from "../hooks/useAuth";
 
 type LoginPageProps = {
   onLogin: () => void;
 };
 
 export function LoginPage({ onLogin }: LoginPageProps) {
+  const { isAuthenticated, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleLogin() {
+    if (isAuthenticated) {
+      onLogin();
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await createWallet();
-      onLogin();
+      await login();
     } finally {
       setIsLoading(false);
     }
@@ -32,7 +37,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           disabled={isLoading}
         >
           <ShieldCheck size={18} />
-          {isLoading ? "Entrando..." : "Entrar com Keycloak"}
+          {isLoading ? "Redirecionando..." : "Entrar com Keycloak"}
         </button>
         <span className="mt-7 flex items-center gap-2 rounded-md bg-neutral-100 px-4 py-3 text-xs font-semibold text-green-700">
           <Lock size={14} />

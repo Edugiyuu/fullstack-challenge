@@ -1,15 +1,15 @@
 import { Banknote, CircleDollarSign } from "lucide-react";
-import { PLAYER_ID } from "../lib/config";
 import type { Wallet } from "../types/wallet";
 import { formatCurrency } from "../utils/format";
 import { Brand } from "./Brand";
 
 type TopBarProps = {
+  playerId: string;
   wallet: Wallet | null;
   onLogout: () => void;
 };
 
-export function TopBar({ wallet, onLogout }: TopBarProps) {
+export function TopBar({ playerId, wallet, onLogout }: TopBarProps) {
   return (
     <header className="flex flex-col gap-4 bg-black px-5 py-4 md:flex-row md:items-center md:justify-between md:px-8">
       <Brand />
@@ -19,7 +19,7 @@ export function TopBar({ wallet, onLogout }: TopBarProps) {
           onClick={onLogout}
         >
           <CircleDollarSign size={16} />
-          {PLAYER_ID}
+          {playerId}
         </button>
         <div className="flex items-center gap-2 rounded-lg border border-green-600 bg-green-950/20 px-4 py-2 text-sm text-neutral-200">
           <Banknote size={16} />

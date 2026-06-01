@@ -6,6 +6,7 @@ import { LiveBetsPanel } from "../components/LiveBetsPanel";
 import { TopBar } from "../components/TopBar";
 import { initialHistory, initialLiveBets } from "../data/mock-game";
 import { useGameSocket } from "../hooks/useGameSocket";
+import { useAuth } from "../hooks/useAuth";
 import { useWallet } from "../hooks/useWallet";
 import { cashoutBet, getCurrentRound, placeBet } from "../lib/api";
 import type { BetResult, LiveBet, Round } from "../types/game";
@@ -17,6 +18,7 @@ type GamePageProps = {
 };
 
 export function GamePage({ onLogout }: GamePageProps) {
+  const { logout, playerId } = useAuth();
   const { ensureWallet, refreshWallet, wallet } = useWallet();
   const [round, setRound] = useState<Round | null>(null);
   const [betAmount, setBetAmount] = useState("100");
@@ -83,10 +85,14 @@ export function GamePage({ onLogout }: GamePageProps) {
   const multiplier = round?.currentMultiplier ?? 100;
   const possiblePayout = useMemo(() => calculatePayoutCents(betAmount, multiplier), [betAmount, multiplier]);
   const canCashout = Boolean(activeBet) && round?.status === "RUNNING";
+  const handleLogout = useCallback(async () => {
+    await logout();
+    onLogout();
+  }, [logout, onLogout]);
 
   return (
     <main className="min-h-screen bg-black text-neutral-100">
-      <TopBar wallet={wallet} onLogout={onLogout} />
+      <TopBar playerId={playerId} wallet={wallet} onLogout={handleLogout} />
       <section className="grid gap-5 bg-black p-4 md:p-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="grid gap-5">
           <FlightPanel round={round} />
