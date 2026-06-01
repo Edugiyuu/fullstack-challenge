@@ -2,8 +2,12 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/commo
 import { connect, type Channel, type ChannelModel, type ConsumeMessage } from "amqplib";
 import {
   RABBITMQ_EXCHANGE,
+  WALLET_CASHOUT_FAILED,
+  WALLET_CASHOUT_SUCCEEDED,
   WALLET_RESERVE_FAILED,
   WALLET_RESERVE_SUCCEEDED,
+  WalletCashoutFailedMessage,
+  WalletCashoutSucceededMessage,
   WalletReserveFailedMessage,
   WalletReserveSucceededMessage,
 } from "../application/messages/wallet-reservation.messages";
@@ -53,6 +57,8 @@ export class RabbitMqWalletReservationResultsConsumer implements OnModuleInit, O
     await this.channel.assertQueue(RESULTS_QUEUE, { durable: true });
     await this.channel.bindQueue(RESULTS_QUEUE, RABBITMQ_EXCHANGE, WALLET_RESERVE_SUCCEEDED);
     await this.channel.bindQueue(RESULTS_QUEUE, RABBITMQ_EXCHANGE, WALLET_RESERVE_FAILED);
+    await this.channel.bindQueue(RESULTS_QUEUE, RABBITMQ_EXCHANGE, WALLET_CASHOUT_SUCCEEDED);
+    await this.channel.bindQueue(RESULTS_QUEUE, RABBITMQ_EXCHANGE, WALLET_CASHOUT_FAILED);
     await this.channel.consume(RESULTS_QUEUE, (message) => this.handleMessage(message));
   }
 
@@ -64,7 +70,9 @@ export class RabbitMqWalletReservationResultsConsumer implements OnModuleInit, O
     try {
       const payload = JSON.parse(message.content.toString()) as
         | WalletReserveSucceededMessage
-        | WalletReserveFailedMessage;
+        | WalletReserveFailedMessage
+        | WalletCashoutSucceededMessage
+        | WalletCashoutFailedMessage;
       this.logger.log(`Wallet reservation result received: ${JSON.stringify(payload)}`);
       this.channel.ack(message);
     } catch (error) {

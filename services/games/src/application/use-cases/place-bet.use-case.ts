@@ -38,6 +38,7 @@ export class PlaceBetUseCase {
       betId: bet.id,
       amountCents: bet.amountCents,
     });
+    this.currentRound.startCurrentRound();
 
     return {
       roundId: bet.roundId,

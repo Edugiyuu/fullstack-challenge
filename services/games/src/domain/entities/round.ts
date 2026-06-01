@@ -124,18 +124,22 @@ export class Round {
     return bet;
   }
 
-  crash(): void {
+  crash(): Bet[] {
     this.transition(RoundStatus.RUNNING, RoundStatus.CRASHED);
+    const lostBets: Bet[] = [];
 
     for (const bet of this.props.bets) {
       try {
         bet.lose();
+        lostBets.push(bet);
       } catch (error) {
         if (!(error instanceof InvalidBetActionError)) {
           throw error;
         }
       }
     }
+
+    return lostBets;
   }
 
   settle(): void {

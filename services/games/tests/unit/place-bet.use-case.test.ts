@@ -18,14 +18,15 @@ class FakeWalletReservationPublisher implements WalletReservationPublisher {
 function createUseCase() {
   const publisher = new FakeWalletReservationPublisher();
   const requestWalletReservation = new RequestWalletReservationUseCase(publisher);
-  const useCase = new PlaceBetUseCase(new CurrentRoundService(), requestWalletReservation);
+  const currentRound = new CurrentRoundService();
+  const useCase = new PlaceBetUseCase(currentRound, requestWalletReservation);
 
-  return { publisher, useCase };
+  return { currentRound, publisher, useCase };
 }
 
 describe("PlaceBetUseCase", () => {
   it("places a bet and publishes a wallet reservation request", async () => {
-    const { publisher, useCase } = createUseCase();
+    const { currentRound, publisher, useCase } = createUseCase();
 
     const result = await useCase.execute({
       playerId: "player",
@@ -42,6 +43,7 @@ describe("PlaceBetUseCase", () => {
     expect(publisher.published[0].amountCents).toBe("100");
     expect(publisher.published[0].roundId).toBe(result.roundId);
     expect(publisher.published[0].betId).toBe(result.betId);
+    currentRound.onModuleDestroy();
   });
 
   it("rejects a bet below the minimum amount", async () => {

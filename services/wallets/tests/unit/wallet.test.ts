@@ -58,6 +58,35 @@ describe("Wallet", () => {
     expect(wallet.reservedCents).toBe(0n);
   });
 
+  it("settles a lost bet by consuming reserved balance", () => {
+    const wallet = Wallet.create({ id: "wallet-1", playerId: "player-1", initialBalanceCents: 10_00n });
+    wallet.reserve(Money.fromCents(4_00n));
+
+    wallet.settleLostBet(Money.fromCents(4_00n));
+
+    expect(wallet.balanceCents).toBe(6_00n);
+    expect(wallet.reservedCents).toBe(0n);
+  });
+
+  it("settles cashout by consuming reserved balance and crediting payout", () => {
+    const wallet = Wallet.create({ id: "wallet-1", playerId: "player-1", initialBalanceCents: 10_00n });
+    wallet.reserve(Money.fromCents(4_00n));
+
+    wallet.settleCashout(Money.fromCents(4_00n), Money.fromCents(6_00n));
+
+    expect(wallet.balanceCents).toBe(12_00n);
+    expect(wallet.reservedCents).toBe(0n);
+  });
+
+  it("rejects settlement when reserved balance is insufficient", () => {
+    const wallet = Wallet.create({ id: "wallet-1", playerId: "player-1", initialBalanceCents: 10_00n });
+
+    expect(() => wallet.settleLostBet(Money.fromCents(1_00n))).toThrow(InsufficientFundsError);
+    expect(() => wallet.settleCashout(Money.fromCents(1_00n), Money.fromCents(2_00n))).toThrow(
+      InsufficientFundsError,
+    );
+  });
+
   it("accepts only integer cents for money amounts", () => {
     expect(() => Money.fromCents(10.99)).toThrow(InvalidMoneyAmountError);
     expect(() => Money.fromCents(-1n)).toThrow(InvalidMoneyAmountError);

@@ -74,9 +74,26 @@ export class Wallet {
     this.props.balance = this.props.balance.add(amount);
   }
 
+  settleLostBet(amount: Money): void {
+    this.ensureReserved(amount);
+    this.props.reserved = this.props.reserved.subtract(amount);
+  }
+
+  settleCashout(reservedAmount: Money, payout: Money): void {
+    this.ensureReserved(reservedAmount);
+    this.props.reserved = this.props.reserved.subtract(reservedAmount);
+    this.props.balance = this.props.balance.add(payout);
+  }
+
   private ensureAvailable(amount: Money): void {
     if (this.props.balance.isLessThan(amount)) {
       throw new InsufficientFundsError("Available balance is insufficient");
+    }
+  }
+
+  private ensureReserved(amount: Money): void {
+    if (this.props.reserved.isLessThan(amount)) {
+      throw new InsufficientFundsError("Reserved balance is insufficient");
     }
   }
 }
