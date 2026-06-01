@@ -21,12 +21,9 @@ export class RabbitMqWalletReservationResultsConsumer implements OnModuleInit, O
   private channel?: Channel;
 
   async onModuleInit(): Promise<void> {
-    try {
-      await this.connectWithRetry();
-      this.logger.log("RabbitMQ wallet reservation results consumer connected");
-    } catch (error) {
-      this.logger.error("Failed to connect RabbitMQ wallet reservation results consumer", error);
-    }
+    void this.connectWithRetry()
+      .then(() => this.logger.log("RabbitMQ wallet reservation results consumer connected"))
+      .catch((error) => this.logger.error("Failed to connect RabbitMQ wallet reservation results consumer", error));
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -51,7 +48,7 @@ export class RabbitMqWalletReservationResultsConsumer implements OnModuleInit, O
 
   private async connect(): Promise<void> {
     const rabbitUrl = process.env.RABBITMQ_URL ?? "amqp://admin:admin@localhost:5672";
-    this.connection = await connect(rabbitUrl);
+    this.connection = await connect(rabbitUrl, { timeout: 5_000 });
     this.channel = await this.connection.createChannel();
     await this.channel.assertExchange(RABBITMQ_EXCHANGE, "topic", { durable: true });
     await this.channel.assertQueue(RESULTS_QUEUE, { durable: true });

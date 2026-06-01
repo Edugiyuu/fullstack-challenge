@@ -1,11 +1,40 @@
 import { describe, expect, it } from "bun:test";
 import { WalletReserveRequestedMessage } from "../../src/application/messages/wallet-reservation.messages";
+import { GameRealtimePublisher } from "../../src/application/ports/game-realtime-publisher";
 import { type WalletReservationPublisher } from "../../src/application/ports/wallet-reservation-publisher";
 import { CurrentRoundService } from "../../src/application/services/current-round.service";
 import { PlaceBetUseCase } from "../../src/application/use-cases/place-bet.use-case";
 import { RequestWalletReservationUseCase } from "../../src/application/use-cases/request-wallet-reservation.use-case";
 import { BetStatus } from "../../src/domain/entities/bet";
 import { InvalidBetAmountError } from "../../src/domain/errors";
+
+class FakeGameRealtimePublisher implements GameRealtimePublisher {
+  events: string[] = [];
+
+  publishRoundStarted(): void {
+    this.events.push("round:started");
+  }
+
+  publishRoundMultiplier(): void {
+    this.events.push("round:multiplier");
+  }
+
+  publishRoundCrashed(): void {
+    this.events.push("round:crashed");
+  }
+
+  publishRoundSettled(): void {
+    this.events.push("round:settled");
+  }
+
+  publishBetPlaced(): void {
+    this.events.push("bet:placed");
+  }
+
+  publishBetCashedOut(): void {
+    this.events.push("bet:cashedout");
+  }
+}
 
 class FakeWalletReservationPublisher implements WalletReservationPublisher {
   published: WalletReserveRequestedMessage[] = [];
@@ -16,17 +45,18 @@ class FakeWalletReservationPublisher implements WalletReservationPublisher {
 }
 
 function createUseCase() {
+  const realtime = new FakeGameRealtimePublisher();
   const publisher = new FakeWalletReservationPublisher();
   const requestWalletReservation = new RequestWalletReservationUseCase(publisher);
-  const currentRound = new CurrentRoundService();
-  const useCase = new PlaceBetUseCase(currentRound, requestWalletReservation);
+  const currentRound = new CurrentRoundService(undefined, realtime);
+  const useCase = new PlaceBetUseCase(currentRound, requestWalletReservation, realtime);
 
-  return { currentRound, publisher, useCase };
+  return { currentRound, publisher, realtime, useCase };
 }
 
 describe("PlaceBetUseCase", () => {
   it("places a bet and publishes a wallet reservation request", async () => {
-    const { currentRound, publisher, useCase } = createUseCase();
+    const { currentRound, publisher, realtime, useCase } = createUseCase();
 
     const result = await useCase.execute({
       playerId: "player",
@@ -43,6 +73,8 @@ describe("PlaceBetUseCase", () => {
     expect(publisher.published[0].amountCents).toBe("100");
     expect(publisher.published[0].roundId).toBe(result.roundId);
     expect(publisher.published[0].betId).toBe(result.betId);
+    expect(realtime.events).toContain("bet:placed");
+    expect(realtime.events).toContain("round:started");
     currentRound.onModuleDestroy();
   });
 

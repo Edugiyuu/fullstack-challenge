@@ -16,12 +16,9 @@ export class RabbitMqWalletSettlementPublisher implements WalletSettlementPublis
   private channel?: Channel;
 
   async onModuleInit(): Promise<void> {
-    try {
-      await this.connectWithRetry();
-      this.logger.log("RabbitMQ wallet settlement publisher connected");
-    } catch (error) {
-      this.logger.error("Failed to connect RabbitMQ wallet settlement publisher", error);
-    }
+    void this.connectWithRetry()
+      .then(() => this.logger.log("RabbitMQ wallet settlement publisher connected"))
+      .catch((error) => this.logger.error("Failed to connect RabbitMQ wallet settlement publisher", error));
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -68,7 +65,7 @@ export class RabbitMqWalletSettlementPublisher implements WalletSettlementPublis
 
   private async connect(): Promise<void> {
     const rabbitUrl = process.env.RABBITMQ_URL ?? "amqp://admin:admin@localhost:5672";
-    this.connection = await connect(rabbitUrl);
+    this.connection = await connect(rabbitUrl, { timeout: 5_000 });
     this.channel = await this.connection.createChannel();
     await this.channel.assertExchange(RABBITMQ_EXCHANGE, "topic", { durable: true });
   }

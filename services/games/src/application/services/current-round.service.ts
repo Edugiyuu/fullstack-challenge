@@ -1,8 +1,9 @@
-import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
+import { Inject, Injectable, Logger, OnModuleDestroy, Optional } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import { Bet } from "../../domain/entities/bet";
 import { Round, RoundStatus } from "../../domain/entities/round";
 import { ProvablyFair } from "../../domain/services/provably-fair";
+import { GAME_REALTIME_PUBLISHER, type GameRealtimePublisher } from "../ports/game-realtime-publisher";
 import { RequestWalletBetLostUseCase } from "../use-cases/request-wallet-bet-lost.use-case";
 
 const DEVELOPMENT_CLIENT_SEED = "development-client-seed";
@@ -18,7 +19,13 @@ export class CurrentRoundService implements OnModuleDestroy {
   private nextNonce = 1;
   private ticker?: ReturnType<typeof setInterval>;
 
-  constructor(private readonly requestWalletBetLost?: RequestWalletBetLostUseCase) {}
+  constructor(
+    @Optional()
+    private readonly requestWalletBetLost?: RequestWalletBetLostUseCase,
+    @Optional()
+    @Inject(GAME_REALTIME_PUBLISHER)
+    private readonly gameRealtime?: GameRealtimePublisher,
+  ) {}
 
   onModuleDestroy(): void {
     this.stopTicker();
@@ -49,6 +56,7 @@ export class CurrentRoundService implements OnModuleDestroy {
 
     this.currentMultiplier = 100;
     round.start();
+    this.gameRealtime?.publishRoundStarted(round, this.currentMultiplier);
     this.startTicker();
   }
 
@@ -94,11 +102,14 @@ export class CurrentRoundService implements OnModuleDestroy {
     }
 
     this.currentMultiplier += MULTIPLIER_STEP_CENTS;
+    this.gameRealtime?.publishRoundMultiplier(round, this.currentMultiplier);
 
     if (this.currentMultiplier >= round.crashPoint) {
       this.currentMultiplier = round.crashPoint;
       const lostBets = round.crash();
+      this.gameRealtime?.publishRoundCrashed(round, this.currentMultiplier, lostBets);
       round.settle();
+      this.gameRealtime?.publishRoundSettled(round, this.currentMultiplier);
       this.stopTicker();
       await this.publishLostBets(lostBets);
     }

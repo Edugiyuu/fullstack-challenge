@@ -1,4 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
+import { GAME_REALTIME_PUBLISHER, type GameRealtimePublisher } from "../ports/game-realtime-publisher";
 import { CurrentRoundService } from "../services/current-round.service";
 import { RequestWalletCashoutUseCase } from "./request-wallet-cashout.use-case";
 
@@ -21,6 +22,9 @@ export class CashoutBetUseCase {
   constructor(
     private readonly currentRound: CurrentRoundService,
     private readonly requestWalletCashout: RequestWalletCashoutUseCase,
+    @Optional()
+    @Inject(GAME_REALTIME_PUBLISHER)
+    private readonly gameRealtime?: GameRealtimePublisher,
   ) {}
 
   async execute(command: CashoutBetCommand): Promise<CashoutBetResult> {
@@ -34,6 +38,7 @@ export class CashoutBetUseCase {
       reservedAmountCents: bet.amountCents,
       payoutCents: bet.payoutCents ?? 0n,
     });
+    this.gameRealtime?.publishBetCashedOut(bet);
 
     return {
       roundId: bet.roundId,

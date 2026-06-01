@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { GAME_REALTIME_PUBLISHER } from "./application/ports/game-realtime-publisher";
 import { WALLET_RESERVATION_PUBLISHER } from "./application/ports/wallet-reservation-publisher";
 import { WALLET_SETTLEMENT_PUBLISHER } from "./application/ports/wallet-settlement-publisher";
 import { CurrentRoundService } from "./application/services/current-round.service";
@@ -7,6 +8,7 @@ import { PlaceBetUseCase } from "./application/use-cases/place-bet.use-case";
 import { RequestWalletBetLostUseCase } from "./application/use-cases/request-wallet-bet-lost.use-case";
 import { RequestWalletCashoutUseCase } from "./application/use-cases/request-wallet-cashout.use-case";
 import { RequestWalletReservationUseCase } from "./application/use-cases/request-wallet-reservation.use-case";
+import { GameEventsGateway } from "./infrastructure/game-events.gateway";
 import { RabbitMqWalletReservationPublisher } from "./infrastructure/rabbitmq-wallet-reservation.publisher";
 import { RabbitMqWalletReservationResultsConsumer } from "./infrastructure/rabbitmq-wallet-reservation-results.consumer";
 import { RabbitMqWalletSettlementPublisher } from "./infrastructure/rabbitmq-wallet-settlement.publisher";
@@ -21,7 +23,12 @@ import { GamesController } from "./presentation/controllers/games.controller";
     RequestWalletBetLostUseCase,
     RequestWalletCashoutUseCase,
     RequestWalletReservationUseCase,
+    GameEventsGateway,
     RabbitMqWalletReservationResultsConsumer,
+    {
+      provide: GAME_REALTIME_PUBLISHER,
+      useExisting: GameEventsGateway,
+    },
     {
       provide: WALLET_RESERVATION_PUBLISHER,
       useClass: RabbitMqWalletReservationPublisher,
