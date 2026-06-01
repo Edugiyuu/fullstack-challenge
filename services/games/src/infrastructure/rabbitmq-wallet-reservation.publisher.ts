@@ -1,7 +1,11 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { connect, type Channel, type ChannelModel } from "amqplib";
-import { RABBITMQ_EXCHANGE, WALLET_RESERVE_REQUESTED, WalletReserveRequestedMessage } from "../application/messages";
-import { type WalletReservationPublisher } from "../application/wallet-reservation-publisher";
+import {
+  RABBITMQ_EXCHANGE,
+  WALLET_RESERVE_REQUESTED,
+  WalletReserveRequestedMessage,
+} from "../application/messages/wallet-reservation.messages";
+import { type WalletReservationPublisher } from "../application/ports/wallet-reservation-publisher";
 
 @Injectable()
 export class RabbitMqWalletReservationPublisher

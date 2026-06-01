@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { type WalletRepository } from "../application/wallet-repository";
-import { Wallet } from "../domain/wallet";
+import { type WalletRepository } from "../application/ports/wallet-repository";
+import { Wallet } from "../domain/entities/wallet";
 
 @Injectable()
 export class InMemoryWalletRepository implements WalletRepository {

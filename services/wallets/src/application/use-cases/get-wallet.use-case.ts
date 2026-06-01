@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { WALLET_REPOSITORY } from "./wallet-repository";
-import type { WalletRepository } from "./wallet-repository";
-import { Wallet } from "../domain/wallet";
+import { Wallet } from "../../domain/entities/wallet";
+import { WALLET_REPOSITORY } from "../ports/wallet-repository";
+import type { WalletRepository } from "../ports/wallet-repository";
 
 @Injectable()
 export class GetWalletUseCase {

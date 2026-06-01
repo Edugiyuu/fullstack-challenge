@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { BetStatus } from "../../src/domain/bet";
+import { BetStatus } from "../../src/domain/entities/bet";
+import { MAX_BET_CENTS, MIN_BET_CENTS, Round, RoundStatus } from "../../src/domain/entities/round";
 import { InvalidBetActionError, InvalidBetAmountError, InvalidRoundTransitionError } from "../../src/domain/errors";
-import { MAX_BET_CENTS, MIN_BET_CENTS, Round, RoundStatus } from "../../src/domain/round";
 
 function createRound(): Round {
   return Round.create({

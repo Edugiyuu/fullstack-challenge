@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import { CurrentRoundService } from "../../src/application/current-round.service";
-import { PlaceBetUseCase } from "../../src/application/place-bet.use-case";
-import { RequestWalletReservationUseCase } from "../../src/application/request-wallet-reservation.use-case";
-import { WalletReserveRequestedMessage } from "../../src/application/messages";
-import { type WalletReservationPublisher } from "../../src/application/wallet-reservation-publisher";
-import { BetStatus } from "../../src/domain/bet";
+import { WalletReserveRequestedMessage } from "../../src/application/messages/wallet-reservation.messages";
+import { type WalletReservationPublisher } from "../../src/application/ports/wallet-reservation-publisher";
+import { CurrentRoundService } from "../../src/application/services/current-round.service";
+import { PlaceBetUseCase } from "../../src/application/use-cases/place-bet.use-case";
+import { RequestWalletReservationUseCase } from "../../src/application/use-cases/request-wallet-reservation.use-case";
+import { BetStatus } from "../../src/domain/entities/bet";
 import { InvalidBetAmountError } from "../../src/domain/errors";
 
 class FakeWalletReservationPublisher implements WalletReservationPublisher {

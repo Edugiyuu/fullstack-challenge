@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { ProvablyFair } from "../../src/domain/provably-fair";
+import { ProvablyFair } from "../../src/domain/services/provably-fair";
 
 const serverSeed = "round-server-seed";
 const clientSeed = "player-visible-client-seed";

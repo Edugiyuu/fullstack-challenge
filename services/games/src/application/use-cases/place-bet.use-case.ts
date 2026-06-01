@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
-import { BetStatus } from "../domain/bet";
-import { CurrentRoundService } from "./current-round.service";
+import { BetStatus } from "../../domain/entities/bet";
+import { CurrentRoundService } from "../services/current-round.service";
 import { RequestWalletReservationUseCase } from "./request-wallet-reservation.use-case";
 
 export type PlaceBetCommand = {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { ReserveWalletBalanceUseCase } from "../../src/application/reserve-wallet-balance.use-case";
-import { type WalletRepository } from "../../src/application/wallet-repository";
-import { Wallet } from "../../src/domain/wallet";
+import { type WalletRepository } from "../../src/application/ports/wallet-repository";
+import { ReserveWalletBalanceUseCase } from "../../src/application/use-cases/reserve-wallet-balance.use-case";
+import { Wallet } from "../../src/domain/entities/wallet";
 
 class FakeWalletRepository implements WalletRepository {
   private wallet: Wallet | null;

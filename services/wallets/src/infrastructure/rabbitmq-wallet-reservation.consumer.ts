@@ -9,8 +9,8 @@ import {
   WalletReserveFailedMessage,
   WalletReserveRequestedMessage,
   WalletReserveSucceededMessage,
-} from "../application/messages";
-import { ReserveWalletBalanceUseCase } from "../application/reserve-wallet-balance.use-case";
+} from "../application/messages/wallet-reservation.messages";
+import { ReserveWalletBalanceUseCase } from "../application/use-cases/reserve-wallet-balance.use-case";
 
 const REQUESTS_QUEUE = "wallets.reserve.requests";
 

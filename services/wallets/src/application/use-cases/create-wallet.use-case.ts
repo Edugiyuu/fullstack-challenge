@@ -1,8 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
-import { Wallet } from "../domain/wallet";
-import { WALLET_REPOSITORY } from "./wallet-repository";
-import type { WalletRepository } from "./wallet-repository";
+import { Wallet } from "../../domain/entities/wallet";
+import { WALLET_REPOSITORY } from "../ports/wallet-repository";
+import type { WalletRepository } from "../ports/wallet-repository";
 
 export const DEFAULT_INITIAL_BALANCE_CENTS = 100_000n;
 

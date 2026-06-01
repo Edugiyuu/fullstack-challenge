@@ -1,4 +1,4 @@
-import { InvalidBetActionError } from "./errors";
+import { InvalidBetActionError } from "../errors";
 
 export const BetStatus = {
   PLACED: "PLACED",

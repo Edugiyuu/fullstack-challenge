@@ -1,4 +1,4 @@
-import { WalletReserveRequestedMessage } from "./messages";
+import { WalletReserveRequestedMessage } from "../messages/wallet-reservation.messages";
 
 export const WALLET_RESERVATION_PUBLISHER = Symbol("WALLET_RESERVATION_PUBLISHER");
 

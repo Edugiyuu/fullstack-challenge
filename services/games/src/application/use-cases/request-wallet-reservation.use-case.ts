@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
-import { WalletReserveRequestedMessage } from "./messages";
-import { WALLET_RESERVATION_PUBLISHER, type WalletReservationPublisher } from "./wallet-reservation-publisher";
+import { WalletReserveRequestedMessage } from "../messages/wallet-reservation.messages";
+import { WALLET_RESERVATION_PUBLISHER, type WalletReservationPublisher } from "../ports/wallet-reservation-publisher";
 
 export type RequestWalletReservationCommand = {
   playerId: string;

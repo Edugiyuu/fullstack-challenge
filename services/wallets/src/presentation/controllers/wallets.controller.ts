@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Headers, Post } from "@nestjs/common";
-import { CreateWalletUseCase } from "../../application/create-wallet.use-case";
-import { GetWalletUseCase } from "../../application/get-wallet.use-case";
-import { Wallet } from "../../domain/wallet";
+import { CreateWalletUseCase } from "../../application/use-cases/create-wallet.use-case";
+import { GetWalletUseCase } from "../../application/use-cases/get-wallet.use-case";
+import { Wallet } from "../../domain/entities/wallet";
 import { HealthCheckResponseDto } from "../dtos/health-check-response.dto";
 
 @Controller()

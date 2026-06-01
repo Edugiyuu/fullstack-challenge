@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { Bet, BetStatus } from "../../src/domain/bet";
+import { Bet, BetStatus } from "../../src/domain/entities/bet";
 import { InvalidBetActionError } from "../../src/domain/errors";
 
 describe("Bet", () => {

@@ -1,5 +1,5 @@
-import { InsufficientFundsError } from "./errors";
-import { Money } from "./money";
+import { InsufficientFundsError } from "../errors";
+import { Money } from "../value-objects/money";
 
 type WalletProps = {
   id: string;

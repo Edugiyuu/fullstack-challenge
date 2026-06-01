@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { InsufficientFundsError, InvalidMoneyAmountError } from "../../src/domain/errors";
-import { Money } from "../../src/domain/money";
-import { Wallet } from "../../src/domain/wallet";
+import { Wallet } from "../../src/domain/entities/wallet";
+import { Money } from "../../src/domain/value-objects/money";
 
 describe("Wallet", () => {
   it("creates a wallet with an initial balance in cents", () => {

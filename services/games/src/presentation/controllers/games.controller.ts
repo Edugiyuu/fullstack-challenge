@@ -1,8 +1,8 @@
 import { BadRequestException, Body, Controller, Get, Headers, Post } from "@nestjs/common";
-import { CurrentRoundService } from "../../application/current-round.service";
-import { PlaceBetUseCase, type PlaceBetResult } from "../../application/place-bet.use-case";
+import { CurrentRoundService } from "../../application/services/current-round.service";
+import { PlaceBetUseCase, type PlaceBetResult } from "../../application/use-cases/place-bet.use-case";
 import { InvalidBetActionError, InvalidBetAmountError } from "../../domain/errors";
-import { Round } from "../../domain/round";
+import { Round } from "../../domain/entities/round";
 import { HealthCheckResponseDto } from "../dtos/health-check-response.dto";
 
 @Controller()

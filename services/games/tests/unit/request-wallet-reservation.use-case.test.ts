@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { RequestWalletReservationUseCase } from "../../src/application/request-wallet-reservation.use-case";
-import { WalletReserveRequestedMessage } from "../../src/application/messages";
-import { type WalletReservationPublisher } from "../../src/application/wallet-reservation-publisher";
+import { WalletReserveRequestedMessage } from "../../src/application/messages/wallet-reservation.messages";
+import { type WalletReservationPublisher } from "../../src/application/ports/wallet-reservation-publisher";
+import { RequestWalletReservationUseCase } from "../../src/application/use-cases/request-wallet-reservation.use-case";
 
 class FakeWalletReservationPublisher implements WalletReservationPublisher {
   published?: WalletReserveRequestedMessage;

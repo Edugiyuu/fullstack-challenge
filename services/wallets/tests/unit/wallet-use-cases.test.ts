@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { CreateWalletUseCase, DEFAULT_INITIAL_BALANCE_CENTS } from "../../src/application/create-wallet.use-case";
-import { GetWalletUseCase } from "../../src/application/get-wallet.use-case";
-import { Wallet } from "../../src/domain/wallet";
+import { CreateWalletUseCase, DEFAULT_INITIAL_BALANCE_CENTS } from "../../src/application/use-cases/create-wallet.use-case";
+import { GetWalletUseCase } from "../../src/application/use-cases/get-wallet.use-case";
+import { Wallet } from "../../src/domain/entities/wallet";
 
 class FakeWalletRepository {
   readonly walletsByPlayerId = new Map<string, Wallet>();

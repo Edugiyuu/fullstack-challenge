@@ -1,4 +1,4 @@
-import { Wallet } from "../domain/wallet";
+import { Wallet } from "../../domain/entities/wallet";
 
 export const WALLET_REPOSITORY = Symbol("WALLET_REPOSITORY");
 

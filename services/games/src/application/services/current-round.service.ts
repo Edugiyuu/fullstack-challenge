@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
-import { ProvablyFair } from "../domain/provably-fair";
-import { Round } from "../domain/round";
+import { Round } from "../../domain/entities/round";
+import { ProvablyFair } from "../../domain/services/provably-fair";
 
 const DEVELOPMENT_CLIENT_SEED = "development-client-seed";
 const BETTING_WINDOW_MS = 60_000;

@@ -1,5 +1,5 @@
 import { Bet } from "./bet";
-import { InvalidBetActionError, InvalidBetAmountError, InvalidRoundTransitionError } from "./errors";
+import { InvalidBetActionError, InvalidBetAmountError, InvalidRoundTransitionError } from "../errors";
 
 export const RoundStatus = {
   BETTING: "BETTING",
