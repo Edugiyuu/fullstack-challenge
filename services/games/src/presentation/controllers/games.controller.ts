@@ -1,10 +1,90 @@
-import { Controller, Get } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Headers, Post } from "@nestjs/common";
+import { CurrentRoundService } from "../../application/current-round.service";
+import { PlaceBetUseCase, type PlaceBetResult } from "../../application/place-bet.use-case";
+import { InvalidBetActionError, InvalidBetAmountError } from "../../domain/errors";
+import { Round } from "../../domain/round";
 import { HealthCheckResponseDto } from "../dtos/health-check-response.dto";
 
 @Controller()
 export class GamesController {
+  constructor(
+    private readonly currentRound: CurrentRoundService,
+    private readonly placeBet: PlaceBetUseCase,
+  ) {}
+
   @Get("health")
   check(): HealthCheckResponseDto {
     return { status: "ok", service: "games" };
   }
+
+  @Get("rounds/current")
+  getCurrentRound(): CurrentRoundResponseDto {
+    return toRoundResponse(this.currentRound.getCurrentRound());
+  }
+
+  @Post("bet")
+  async bet(
+    @Headers("x-player-id") playerIdHeader: string | undefined,
+    @Body("amountCents") amountCents: string | undefined,
+  ): Promise<PlaceBetResult> {
+    try {
+      return await this.placeBet.execute({
+        playerId: resolvePlayerId(playerIdHeader),
+        amountCents: parseAmountCents(amountCents),
+      });
+    } catch (error) {
+      if (error instanceof InvalidBetActionError || error instanceof InvalidBetAmountError) {
+        throw new BadRequestException(error.message);
+      }
+
+      throw error;
+    }
+  }
+}
+
+type CurrentRoundResponseDto = {
+  id: string;
+  status: string;
+  crashPoint: number;
+  serverSeedHash: string;
+  clientSeed?: string;
+  nonce: number;
+  bettingEndsAt: string;
+  bets: {
+    id: string;
+    playerId: string;
+    amountCents: string;
+    status: string;
+  }[];
+};
+
+function resolvePlayerId(playerIdHeader: string | undefined): string {
+  const playerId = playerIdHeader?.trim();
+  return playerId || "player";
+}
+
+function parseAmountCents(amountCents: string | undefined): bigint {
+  if (!amountCents || !/^\d+$/.test(amountCents)) {
+    throw new BadRequestException("amountCents must be a string with cents as an integer");
+  }
+
+  return BigInt(amountCents);
+}
+
+function toRoundResponse(round: Round): CurrentRoundResponseDto {
+  return {
+    id: round.id,
+    status: round.status,
+    crashPoint: round.crashPoint,
+    serverSeedHash: round.serverSeedHash,
+    clientSeed: round.clientSeed,
+    nonce: round.nonce,
+    bettingEndsAt: round.bettingEndsAt.toISOString(),
+    bets: round.bets.map((bet) => ({
+      id: bet.id,
+      playerId: bet.playerId,
+      amountCents: bet.amountCents.toString(),
+      status: bet.status,
+    })),
+  };
 }

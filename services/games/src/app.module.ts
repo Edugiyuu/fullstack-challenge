@@ -1,4 +1,6 @@
 import { Module } from "@nestjs/common";
+import { CurrentRoundService } from "./application/current-round.service";
+import { PlaceBetUseCase } from "./application/place-bet.use-case";
 import { RequestWalletReservationUseCase } from "./application/request-wallet-reservation.use-case";
 import { WALLET_RESERVATION_PUBLISHER } from "./application/wallet-reservation-publisher";
 import { RabbitMqWalletReservationPublisher } from "./infrastructure/rabbitmq-wallet-reservation.publisher";
@@ -8,6 +10,8 @@ import { GamesController } from "./presentation/controllers/games.controller";
 @Module({
   controllers: [GamesController],
   providers: [
+    CurrentRoundService,
+    PlaceBetUseCase,
     RequestWalletReservationUseCase,
     RabbitMqWalletReservationResultsConsumer,
     {
