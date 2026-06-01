@@ -4,9 +4,9 @@ import { CreateWalletUseCase } from "./application/use-cases/create-wallet.use-c
 import { GetWalletUseCase } from "./application/use-cases/get-wallet.use-case";
 import { ReserveWalletBalanceUseCase } from "./application/use-cases/reserve-wallet-balance.use-case";
 import { SettleWalletBetUseCase } from "./application/use-cases/settle-wallet-bet.use-case";
-import { PrismaService } from "./infrastructure/prisma.service";
-import { PrismaWalletRepository } from "./infrastructure/prisma-wallet.repository";
-import { RabbitMqWalletReservationConsumer } from "./infrastructure/rabbitmq-wallet-reservation.consumer";
+import { RabbitMqWalletReservationConsumer } from "./infrastructure/messaging/rabbitmq-wallet-reservation.consumer";
+import { PrismaService } from "./infrastructure/persistence/prisma.service";
+import { PrismaWalletRepository } from "./infrastructure/persistence/prisma-wallet.repository";
 import { WalletsController } from "./presentation/controllers/wallets.controller";
 
 @Module({

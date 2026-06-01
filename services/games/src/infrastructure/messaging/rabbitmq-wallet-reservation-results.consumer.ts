@@ -10,7 +10,7 @@ import {
   WalletCashoutSucceededMessage,
   WalletReserveFailedMessage,
   WalletReserveSucceededMessage,
-} from "../application/messages/wallet-reservation.messages";
+} from "../../application/messages/wallet-reservation.messages";
 
 const RESULTS_QUEUE = "games.wallet.reserve.results";
 

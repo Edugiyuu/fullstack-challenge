@@ -4,8 +4,8 @@ import {
   RABBITMQ_EXCHANGE,
   WALLET_RESERVE_REQUESTED,
   WalletReserveRequestedMessage,
-} from "../application/messages/wallet-reservation.messages";
-import { type WalletReservationPublisher } from "../application/ports/wallet-reservation-publisher";
+} from "../../application/messages/wallet-reservation.messages";
+import { type WalletReservationPublisher } from "../../application/ports/wallet-reservation-publisher";
 
 @Injectable()
 export class RabbitMqWalletReservationPublisher

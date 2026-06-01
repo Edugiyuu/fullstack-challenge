@@ -8,10 +8,10 @@ import { PlaceBetUseCase } from "./application/use-cases/place-bet.use-case";
 import { RequestWalletBetLostUseCase } from "./application/use-cases/request-wallet-bet-lost.use-case";
 import { RequestWalletCashoutUseCase } from "./application/use-cases/request-wallet-cashout.use-case";
 import { RequestWalletReservationUseCase } from "./application/use-cases/request-wallet-reservation.use-case";
-import { GameEventsGateway } from "./infrastructure/game-events.gateway";
-import { RabbitMqWalletReservationPublisher } from "./infrastructure/rabbitmq-wallet-reservation.publisher";
-import { RabbitMqWalletReservationResultsConsumer } from "./infrastructure/rabbitmq-wallet-reservation-results.consumer";
-import { RabbitMqWalletSettlementPublisher } from "./infrastructure/rabbitmq-wallet-settlement.publisher";
+import { RabbitMqWalletReservationPublisher } from "./infrastructure/messaging/rabbitmq-wallet-reservation.publisher";
+import { RabbitMqWalletReservationResultsConsumer } from "./infrastructure/messaging/rabbitmq-wallet-reservation-results.consumer";
+import { RabbitMqWalletSettlementPublisher } from "./infrastructure/messaging/rabbitmq-wallet-settlement.publisher";
+import { GameEventsGateway } from "./infrastructure/websocket/game-events.gateway";
 import { GamesController } from "./presentation/controllers/games.controller";
 
 @Module({

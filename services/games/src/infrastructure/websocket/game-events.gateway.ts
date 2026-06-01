@@ -1,13 +1,13 @@
 import { Logger } from "@nestjs/common";
 import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
-import { Bet } from "../domain/entities/bet";
-import { Round } from "../domain/entities/round";
+import { Bet } from "../../domain/entities/bet";
+import { Round } from "../../domain/entities/round";
 import {
   BetRealtimePayload,
   GameRealtimePublisher,
   RoundRealtimePayload,
-} from "../application/ports/game-realtime-publisher";
+} from "../../application/ports/game-realtime-publisher";
 
 @WebSocketGateway({
   cors: {

@@ -17,9 +17,9 @@ import {
   WalletReserveFailedMessage,
   WalletReserveRequestedMessage,
   WalletReserveSucceededMessage,
-} from "../application/messages/wallet-reservation.messages";
-import { ReserveWalletBalanceUseCase } from "../application/use-cases/reserve-wallet-balance.use-case";
-import { SettleWalletBetUseCase } from "../application/use-cases/settle-wallet-bet.use-case";
+} from "../../application/messages/wallet-reservation.messages";
+import { ReserveWalletBalanceUseCase } from "../../application/use-cases/reserve-wallet-balance.use-case";
+import { SettleWalletBetUseCase } from "../../application/use-cases/settle-wallet-bet.use-case";
 
 const REQUESTS_QUEUE = "wallets.reserve.requests";
 

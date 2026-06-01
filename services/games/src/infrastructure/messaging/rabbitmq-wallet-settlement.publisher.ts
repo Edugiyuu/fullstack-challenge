@@ -6,8 +6,8 @@ import {
   WALLET_CASHOUT_REQUESTED,
   WalletBetLostRequestedMessage,
   WalletCashoutRequestedMessage,
-} from "../application/messages/wallet-reservation.messages";
-import { type WalletSettlementPublisher } from "../application/ports/wallet-settlement-publisher";
+} from "../../application/messages/wallet-reservation.messages";
+import { type WalletSettlementPublisher } from "../../application/ports/wallet-settlement-publisher";
 
 @Injectable()
 export class RabbitMqWalletSettlementPublisher implements WalletSettlementPublisher, OnModuleInit, OnModuleDestroy {
