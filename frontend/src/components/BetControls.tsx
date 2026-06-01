@@ -5,10 +5,12 @@ import { NoticeBar } from "./NoticeBar";
 type BetControlsProps = {
   autoCashout: string;
   betAmount: string;
+  betWarning?: string;
   canCashout: boolean;
   isBetting: boolean;
   isCashingOut: boolean;
   notice: string;
+  noticeTone?: "default" | "error";
   possiblePayout: string;
   roundStatus?: string;
   onAutoCashoutChange: (value: string) => void;
@@ -20,10 +22,12 @@ type BetControlsProps = {
 export function BetControls({
   autoCashout,
   betAmount,
+  betWarning,
   canCashout,
   isBetting,
   isCashingOut,
   notice,
+  noticeTone = "default",
   possiblePayout,
   roundStatus,
   onAutoCashoutChange,
@@ -31,7 +35,8 @@ export function BetControls({
   onBetAmountChange,
   onCashout,
 }: BetControlsProps) {
-  const isBetDisabled = isBetting || roundStatus === "RUNNING";
+  const isBetDisabled = isBetting || roundStatus !== "BETTING" || Boolean(betWarning);
+  const displayedNotice = betWarning ?? notice;
 
   return (
     <section className="rounded-lg border border-neutral-800 bg-black p-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)]">
@@ -107,7 +112,7 @@ export function BetControls({
         </button>
       </div>
 
-      <NoticeBar>{notice}</NoticeBar>
+      <NoticeBar tone={betWarning ? "error" : noticeTone}>{displayedNotice}</NoticeBar>
     </section>
   );
 }

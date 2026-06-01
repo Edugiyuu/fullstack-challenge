@@ -77,4 +77,12 @@ export class Bet {
 
     this.props.status = BetStatus.LOST;
   }
+
+  refund(): void {
+    if (this.props.status !== BetStatus.PLACED) {
+      throw new InvalidBetActionError("Only placed bets can be refunded");
+    }
+
+    this.props.status = BetStatus.REFUNDED;
+  }
 }

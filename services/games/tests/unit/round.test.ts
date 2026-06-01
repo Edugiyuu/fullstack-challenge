@@ -73,6 +73,17 @@ describe("Round", () => {
     );
   });
 
+  it("allows a player to bet again after a wallet reservation rejection", () => {
+    const round = createRound();
+    const rejectedBet = round.placeBet({ id: "bet-1", playerId: "player-1", amountCents: 10_00n });
+
+    round.refundBet(rejectedBet.id);
+    const nextBet = round.placeBet({ id: "bet-2", playerId: "player-1", amountCents: 5_00n });
+
+    expect(rejectedBet.status).toBe(BetStatus.REFUNDED);
+    expect(nextBet.status).toBe(BetStatus.PLACED);
+  });
+
   it("rejects bets when the round is running or crashed", () => {
     const runningRound = createRound();
     runningRound.start();

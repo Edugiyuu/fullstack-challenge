@@ -55,9 +55,21 @@ export function GamePage({ onLogout }: GamePageProps) {
   });
 
   async function handleBet() {
+    const amountCents = toCentsString(betAmount);
+
+    if (BigInt(amountCents) <= 0n) {
+      setNotice("Informe um valor de aposta valido.");
+      return;
+    }
+
+    if (BigInt(amountCents) > BigInt(availableBalanceCents)) {
+      setNotice("Saldo insuficiente para essa aposta.");
+      return;
+    }
+
     setIsBetting(true);
     try {
-      const bet = await placeBet(toCentsString(betAmount));
+      const bet = await placeBet(amountCents);
       setActiveBet(bet);
       setNotice("Aposta aceita. Aguardando reserva da carteira.");
       await delayedWalletRefresh();
@@ -84,6 +96,16 @@ export function GamePage({ onLogout }: GamePageProps) {
 
   const multiplier = round?.currentMultiplier ?? 100;
   const possiblePayout = useMemo(() => calculatePayoutCents(betAmount, multiplier), [betAmount, multiplier]);
+  const betAmountCents = useMemo(() => BigInt(toCentsString(betAmount)), [betAmount]);
+  const availableBalanceCents = useMemo(() => {
+    const balanceCents = BigInt(wallet?.balanceCents ?? "0");
+    return balanceCents > 0n ? balanceCents.toString() : "0";
+  }, [wallet]);
+  const hasInsufficientBalance = betAmountCents > 0n && betAmountCents > BigInt(availableBalanceCents);
+  const betWarning = hasInsufficientBalance
+    ? `Saldo insuficiente. Voce tem ${formatCurrency(availableBalanceCents)} disponivel.`
+    : undefined;
+  const noticeTone = notice.toLowerCase().includes("saldo insuficiente") ? "error" : "default";
   const canCashout = Boolean(activeBet) && round?.status === "RUNNING";
   const handleLogout = useCallback(async () => {
     await logout();
@@ -99,10 +121,12 @@ export function GamePage({ onLogout }: GamePageProps) {
           <BetControls
             autoCashout={autoCashout}
             betAmount={betAmount}
+            betWarning={betWarning}
             canCashout={canCashout}
             isBetting={isBetting}
             isCashingOut={isCashingOut}
             notice={notice}
+            noticeTone={noticeTone}
             possiblePayout={possiblePayout}
             roundStatus={round?.status}
             onAutoCashoutChange={setAutoCashout}

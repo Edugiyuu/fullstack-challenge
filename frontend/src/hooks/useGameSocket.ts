@@ -14,6 +14,13 @@ type UseGameSocketParams = {
   setRound: Dispatch<SetStateAction<Round | null>>;
 };
 
+type RoundRealtimePayload = {
+  roundId: string;
+  status: string;
+  crashPoint: number;
+  currentMultiplier: number;
+};
+
 export function useGameSocket({
   delayedWalletRefresh,
   setActiveBet,
@@ -28,22 +35,28 @@ export function useGameSocket({
     });
 
     socket.on("connect", () => setNotice("Tempo real conectado."));
-    socket.on("round:started", (payload: { currentMultiplier: number; status: string }) => {
-      setRound((current) => (current ? { ...current, status: payload.status, currentMultiplier: payload.currentMultiplier } : current));
+    socket.on("round:started", (payload: RoundRealtimePayload) => {
+      setRound((current) => mergeRoundPayload(current, payload));
       setNotice("Rodada em andamento.");
     });
-    socket.on("round:multiplier", (payload: { currentMultiplier: number; status: string }) => {
-      setRound((current) => (current ? { ...current, status: payload.status, currentMultiplier: payload.currentMultiplier } : current));
+    socket.on("round:multiplier", (payload: RoundRealtimePayload) => {
+      setRound((current) => mergeRoundPayload(current, payload));
     });
-    socket.on("round:crashed", (payload: { currentMultiplier: number; status: string }) => {
-      setRound((current) => (current ? { ...current, status: payload.status, currentMultiplier: payload.currentMultiplier } : current));
+    socket.on("round:crashed", (payload: RoundRealtimePayload & { lostBets?: LiveBet[] }) => {
+      setRound((current) => mergeRoundPayload(current, payload));
+      setLiveBets((current) =>
+        current.map((bet) => {
+          const lostBet = payload.lostBets?.find((currentLostBet) => currentLostBet.betId === bet.betId || currentLostBet.betId === bet.id);
+          return lostBet ? { ...bet, ...lostBet } : bet;
+        }),
+      );
       setHistory((current) => [payload.currentMultiplier, ...current].slice(0, 18));
       setNotice(`Crash em ${formatMultiplier(payload.currentMultiplier)}.`);
       setActiveBet(null);
       void delayedWalletRefresh();
     });
-    socket.on("round:settled", (payload: { currentMultiplier: number; status: string }) => {
-      setRound((current) => (current ? { ...current, status: payload.status, currentMultiplier: payload.currentMultiplier } : current));
+    socket.on("round:settled", (payload: RoundRealtimePayload) => {
+      setRound((current) => mergeRoundPayload(current, payload));
     });
     socket.on("bet:placed", (payload: LiveBet) => {
       setLiveBets((current) => [payload, ...current].slice(0, 8));
@@ -55,9 +68,28 @@ export function useGameSocket({
       setNotice(`Cashout em ${formatMultiplier(payload.cashoutMultiplier ?? 100)}.`);
       void delayedWalletRefresh();
     });
+    socket.on("bet:rejected", (payload: LiveBet) => {
+      setLiveBets((current) =>
+        current.map((bet) => (bet.betId === payload.betId || bet.id === payload.betId ? { ...bet, ...payload } : bet)),
+      );
+      setActiveBet(null);
+      setNotice("Saldo insuficiente. A aposta foi recusada pela carteira.");
+      void delayedWalletRefresh();
+    });
 
     return () => {
       socket.disconnect();
     };
   }, [delayedWalletRefresh, setActiveBet, setHistory, setLiveBets, setNotice, setRound]);
+}
+
+function mergeRoundPayload(current: Round | null, payload: RoundRealtimePayload): Round {
+  return {
+    id: payload.roundId,
+    status: payload.status,
+    crashPoint: payload.crashPoint,
+    currentMultiplier: payload.currentMultiplier,
+    bettingEndsAt: current?.id === payload.roundId ? current.bettingEndsAt : undefined,
+    bets: current?.id === payload.roundId ? current.bets : [],
+  };
 }

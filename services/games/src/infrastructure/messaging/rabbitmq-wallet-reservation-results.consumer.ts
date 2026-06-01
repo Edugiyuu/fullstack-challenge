@@ -11,6 +11,7 @@ import {
   WalletReserveFailedMessage,
   WalletReserveSucceededMessage,
 } from "../../application/messages/wallet-reservation.messages";
+import { CurrentRoundService } from "../../application/services/current-round.service";
 
 const RESULTS_QUEUE = "games.wallet.reserve.results";
 
@@ -19,6 +20,8 @@ export class RabbitMqWalletReservationResultsConsumer implements OnModuleInit, O
   private readonly logger = new Logger(RabbitMqWalletReservationResultsConsumer.name);
   private connection?: ChannelModel;
   private channel?: Channel;
+
+  constructor(private readonly currentRound: CurrentRoundService) {}
 
   async onModuleInit(): Promise<void> {
     void this.connectWithRetry()
@@ -71,10 +74,26 @@ export class RabbitMqWalletReservationResultsConsumer implements OnModuleInit, O
         | WalletCashoutSucceededMessage
         | WalletCashoutFailedMessage;
       this.logger.log(`Wallet reservation result received: ${JSON.stringify(payload)}`);
+      this.handleWalletResult(payload);
       this.channel.ack(message);
     } catch (error) {
       this.logger.error("Failed to process wallet reservation result", error);
       this.channel.nack(message, false, false);
+    }
+  }
+
+  private handleWalletResult(
+    payload:
+      | WalletReserveSucceededMessage
+      | WalletReserveFailedMessage
+      | WalletCashoutSucceededMessage
+      | WalletCashoutFailedMessage,
+  ): void {
+    if ("reason" in payload && "amountCents" in payload) {
+      this.currentRound.rejectBetReservation({
+        roundId: payload.roundId,
+        betId: payload.betId,
+      });
     }
   }
 }

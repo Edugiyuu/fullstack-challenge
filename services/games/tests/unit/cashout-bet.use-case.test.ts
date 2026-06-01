@@ -34,6 +34,10 @@ class FakeGameRealtimePublisher implements GameRealtimePublisher {
   publishBetCashedOut(): void {
     this.events.push("bet:cashedout");
   }
+
+  publishBetRejected(): void {
+    this.events.push("bet:rejected");
+  }
 }
 
 class FakeWalletSettlementPublisher implements WalletSettlementPublisher {

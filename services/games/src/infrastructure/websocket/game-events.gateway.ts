@@ -51,6 +51,10 @@ export class GameEventsGateway implements GameRealtimePublisher, OnGatewayConnec
     this.emit("bet:cashedout", toBetPayload(bet));
   }
 
+  publishBetRejected(bet: Bet): void {
+    this.emit("bet:rejected", toBetPayload(bet));
+  }
+
   private emit(event: string, payload: unknown): void {
     this.server?.emit(event, payload);
   }

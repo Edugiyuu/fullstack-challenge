@@ -3,6 +3,7 @@ export type Round = {
   status: string;
   crashPoint: number;
   currentMultiplier: number;
+  bettingEndsAt?: string;
   bets: LiveBet[];
 };
 

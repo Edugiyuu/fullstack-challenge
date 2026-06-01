@@ -27,4 +27,5 @@ export interface GameRealtimePublisher {
   publishRoundSettled(round: Round, currentMultiplier: number): void;
   publishBetPlaced(bet: Bet): void;
   publishBetCashedOut(bet: Bet): void;
+  publishBetRejected(bet: Bet): void;
 }

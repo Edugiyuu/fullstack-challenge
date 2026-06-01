@@ -34,6 +34,10 @@ class FakeGameRealtimePublisher implements GameRealtimePublisher {
   publishBetCashedOut(): void {
     this.events.push("bet:cashedout");
   }
+
+  publishBetRejected(): void {
+    this.events.push("bet:rejected");
+  }
 }
 
 class FakeWalletReservationPublisher implements WalletReservationPublisher {
@@ -74,12 +78,12 @@ describe("PlaceBetUseCase", () => {
     expect(publisher.published[0].roundId).toBe(result.roundId);
     expect(publisher.published[0].betId).toBe(result.betId);
     expect(realtime.events).toContain("bet:placed");
-    expect(realtime.events).toContain("round:started");
+    expect(realtime.events).not.toContain("round:started");
     currentRound.onModuleDestroy();
   });
 
   it("rejects a bet below the minimum amount", async () => {
-    const { publisher, useCase } = createUseCase();
+    const { currentRound, publisher, useCase } = createUseCase();
 
     await expect(
       useCase.execute({
@@ -89,10 +93,11 @@ describe("PlaceBetUseCase", () => {
     ).rejects.toThrow(InvalidBetAmountError);
 
     expect(publisher.published).toHaveLength(0);
+    currentRound.onModuleDestroy();
   });
 
   it("rejects a bet above the maximum amount", async () => {
-    const { publisher, useCase } = createUseCase();
+    const { currentRound, publisher, useCase } = createUseCase();
 
     await expect(
       useCase.execute({
@@ -102,5 +107,6 @@ describe("PlaceBetUseCase", () => {
     ).rejects.toThrow(InvalidBetAmountError);
 
     expect(publisher.published).toHaveLength(0);
+    currentRound.onModuleDestroy();
   });
 });

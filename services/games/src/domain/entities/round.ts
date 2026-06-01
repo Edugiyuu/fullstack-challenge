@@ -95,7 +95,7 @@ export class Round {
       throw new InvalidBetAmountError("Bet amount is outside allowed limits");
     }
 
-    if (this.props.bets.some((bet) => bet.playerId === params.playerId)) {
+    if (this.props.bets.some((bet) => bet.playerId === params.playerId && bet.status !== "REFUNDED")) {
       throw new InvalidBetActionError("Player already placed a bet in this round");
     }
 
@@ -121,6 +121,17 @@ export class Round {
 
     const bet = this.findBetByPlayer(playerId);
     bet.cashout(multiplier);
+    return bet;
+  }
+
+  refundBet(betId: string): Bet {
+    const bet = this.props.bets.find((currentBet) => currentBet.id === betId);
+
+    if (!bet) {
+      throw new InvalidBetActionError("Bet not found in this round");
+    }
+
+    bet.refund();
     return bet;
   }
 

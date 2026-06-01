@@ -43,7 +43,6 @@ export class PlaceBetUseCase {
       amountCents: bet.amountCents,
     });
     this.gameRealtime?.publishBetPlaced(bet);
-    this.currentRound.startCurrentRound();
 
     return {
       roundId: bet.roundId,
