@@ -10,6 +10,8 @@ const PASSWORD = process.env.E2E_PASSWORD ?? "player123";
 type RoundResponse = {
   id: string;
   status: string;
+  crashPoint: number;
+  serverSeedHash: string;
   currentMultiplier: number;
   bets: {
     playerId: string;
@@ -19,6 +21,14 @@ type RoundResponse = {
 type WalletResponse = {
   balanceCents: string;
   reservedCents: string;
+};
+
+type VerifyResponse = {
+  roundId: string;
+  crashPoint: number;
+  serverSeedHash: string;
+  nonce: number;
+  revealed: boolean;
 };
 
 describe("Crash gameplay e2e", () => {
@@ -41,9 +51,19 @@ describe("Crash gameplay e2e", () => {
     });
     expect(createWallet.ok).toBe(true);
 
-    await waitForBettingRound();
+    const round = await waitForBettingRound();
 
     const walletBefore = await getWallet(authHeaders);
+    const verifyResponse = await fetch(`${API_BASE_URL}/games/rounds/${round.id}/verify`);
+    expect(verifyResponse.ok).toBe(true);
+
+    const verification = (await verifyResponse.json()) as VerifyResponse;
+    expect(verification.roundId).toBe(round.id);
+    expect(verification.crashPoint).toBe(round.crashPoint);
+    expect(verification.serverSeedHash).toBe(round.serverSeedHash);
+    expect(verification.nonce).toBeGreaterThan(0);
+    expect(verification.revealed).toBe(false);
+
     const bet = await fetch(`${API_BASE_URL}/games/bet`, {
       method: "POST",
       headers: { ...authHeaders, "content-type": "application/json" },
@@ -58,23 +78,24 @@ describe("Crash gameplay e2e", () => {
 });
 
 async function getAccessToken(): Promise<string> {
-  const response = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: CLIENT_ID,
-      grant_type: "password",
-      password: PASSWORD,
-      username: USERNAME,
-    }),
-  });
-  const payload = (await response.json()) as { access_token?: string };
-
-  if (!response.ok || !payload.access_token) {
-    throw new Error(`Unable to get Keycloak token: ${response.status}`);
-  }
-
-  return payload.access_token;
+  return poll(async () => {
+    try {
+      const response = await fetch(TOKEN_URL, {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: CLIENT_ID,
+          grant_type: "password",
+          password: PASSWORD,
+          username: USERNAME,
+        }),
+      });
+      const payload = (await response.json().catch(() => null)) as { access_token?: string } | null;
+      return response.ok && payload?.access_token ? payload.access_token : null;
+    } catch {
+      return null;
+    }
+  }, 30_000);
 }
 
 async function getWallet(headers: HeadersInit): Promise<WalletResponse> {

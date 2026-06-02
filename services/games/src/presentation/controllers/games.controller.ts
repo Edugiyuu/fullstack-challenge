@@ -1,9 +1,10 @@
-import { BadRequestException, Body, Controller, Get, Headers, Post } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Headers, NotFoundException, Param, Post } from "@nestjs/common";
 import { CurrentRoundService } from "../../application/services/current-round.service";
 import { CashoutBetUseCase, type CashoutBetResult } from "../../application/use-cases/cashout-bet.use-case";
 import { PlaceBetUseCase, type PlaceBetResult } from "../../application/use-cases/place-bet.use-case";
 import { InvalidBetActionError, InvalidBetAmountError } from "../../domain/errors";
-import { Round } from "../../domain/entities/round";
+import { Round, RoundStatus } from "../../domain/entities/round";
+import { ProvablyFair } from "../../domain/services/provably-fair";
 import { JwtPlayerVerifier } from "../auth/jwt-player";
 import { HealthCheckResponseDto } from "../dtos/health-check-response.dto";
 
@@ -25,6 +26,17 @@ export class GamesController {
   getCurrentRound(): CurrentRoundResponseDto {
     const state = this.currentRound.getCurrentRoundState();
     return toRoundResponse(state.round, state.currentMultiplier);
+  }
+
+  @Get("rounds/:roundId/verify")
+  verifyRound(@Param("roundId") roundId: string): RoundVerificationResponseDto {
+    const round = this.currentRound.findRound(roundId);
+
+    if (!round) {
+      throw new NotFoundException("Round not found");
+    }
+
+    return toRoundVerificationResponse(round);
   }
 
   @Post("bet")
@@ -79,6 +91,17 @@ type CurrentRoundResponseDto = {
   }[];
 };
 
+type RoundVerificationResponseDto = {
+  roundId: string;
+  crashPoint: number;
+  serverSeedHash: string;
+  clientSeed?: string;
+  nonce: number;
+  revealed: boolean;
+  serverSeed?: string;
+  verified?: boolean;
+};
+
 function parseAmountCents(amountCents: string | undefined): bigint {
   if (!amountCents || !/^\d+$/.test(amountCents)) {
     throw new BadRequestException("amountCents must be a string with cents as an integer");
@@ -103,5 +126,33 @@ function toRoundResponse(round: Round, currentMultiplier: number): CurrentRoundR
       amountCents: bet.amountCents.toString(),
       status: bet.status,
     })),
+  };
+}
+
+function toRoundVerificationResponse(round: Round): RoundVerificationResponseDto {
+  const revealed = round.status === RoundStatus.CRASHED || round.status === RoundStatus.SETTLED;
+  const response: RoundVerificationResponseDto = {
+    roundId: round.id,
+    crashPoint: round.crashPoint,
+    serverSeedHash: round.serverSeedHash,
+    clientSeed: round.clientSeed,
+    nonce: round.nonce,
+    revealed,
+  };
+
+  if (!revealed || !round.serverSeed || !round.clientSeed) {
+    return response;
+  }
+
+  return {
+    ...response,
+    serverSeed: round.serverSeed,
+    verified: ProvablyFair.verify({
+      serverSeed: round.serverSeed,
+      serverSeedHash: round.serverSeedHash,
+      clientSeed: round.clientSeed,
+      nonce: round.nonce,
+      crashPoint: round.crashPoint,
+    }),
   };
 }

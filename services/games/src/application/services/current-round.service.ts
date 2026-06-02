@@ -11,12 +11,14 @@ const BETTING_WINDOW_MS = 15_000;
 const ROUND_COOLDOWN_MS = 5_000;
 const MULTIPLIER_STEP_CENTS = 10;
 const TICK_MS = 200;
+const VERIFY_HISTORY_LIMIT = 20;
 
 @Injectable()
 export class CurrentRoundService implements OnModuleDestroy {
   private readonly logger = new Logger(CurrentRoundService.name);
   private currentRound: Round | null = null;
   private currentMultiplier = 100;
+  private readonly recentRounds: Round[] = [];
   private nextNonce = 1;
   private startTimer?: ReturnType<typeof setTimeout>;
   private nextRoundTimer?: ReturnType<typeof setTimeout>;
@@ -51,6 +53,16 @@ export class CurrentRoundService implements OnModuleDestroy {
       round: this.currentRound,
       currentMultiplier: this.currentMultiplier,
     };
+  }
+
+  findRound(roundId: string): Round | null {
+    const current = this.getCurrentRoundState().round;
+
+    if (current.id === roundId) {
+      return current;
+    }
+
+    return this.recentRounds.find((round) => round.id === roundId) ?? null;
   }
 
   startCurrentRound(): void {
@@ -170,8 +182,14 @@ export class CurrentRoundService implements OnModuleDestroy {
       this.gameRealtime?.publishRoundSettled(round, this.currentMultiplier);
       this.stopTicker();
       await this.publishLostBets(lostBets);
+      this.rememberRound(round);
       this.scheduleNextRound();
     }
+  }
+
+  private rememberRound(round: Round): void {
+    this.recentRounds.unshift(round);
+    this.recentRounds.splice(VERIFY_HISTORY_LIMIT);
   }
 
   private async publishLostBets(lostBets: Bet[]): Promise<void> {

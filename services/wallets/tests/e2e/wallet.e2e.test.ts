@@ -47,23 +47,24 @@ describe("Wallet e2e", () => {
 });
 
 async function getAccessToken(): Promise<string> {
-  const response = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: CLIENT_ID,
-      grant_type: "password",
-      password: PASSWORD,
-      username: USERNAME,
-    }),
-  });
-  const payload = (await response.json()) as { access_token?: string };
-
-  if (!response.ok || !payload.access_token) {
-    throw new Error(`Unable to get Keycloak token: ${response.status}`);
-  }
-
-  return payload.access_token;
+  return poll(async () => {
+    try {
+      const response = await fetch(TOKEN_URL, {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: CLIENT_ID,
+          grant_type: "password",
+          password: PASSWORD,
+          username: USERNAME,
+        }),
+      });
+      const payload = (await response.json().catch(() => null)) as { access_token?: string } | null;
+      return response.ok && payload?.access_token ? payload.access_token : null;
+    } catch {
+      return null;
+    }
+  }, 30_000);
 }
 
 async function waitForGateway(): Promise<true> {
