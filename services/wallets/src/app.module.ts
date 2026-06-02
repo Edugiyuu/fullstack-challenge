@@ -7,6 +7,7 @@ import { SettleWalletBetUseCase } from "./application/use-cases/settle-wallet-be
 import { RabbitMqWalletReservationConsumer } from "./infrastructure/messaging/rabbitmq-wallet-reservation.consumer";
 import { PrismaService } from "./infrastructure/persistence/prisma.service";
 import { PrismaWalletRepository } from "./infrastructure/persistence/prisma-wallet.repository";
+import { JwtPlayerVerifier } from "./presentation/auth/jwt-player";
 import { WalletsController } from "./presentation/controllers/wallets.controller";
 
 @Module({
@@ -15,6 +16,7 @@ import { WalletsController } from "./presentation/controllers/wallets.controller
     PrismaService,
     CreateWalletUseCase,
     GetWalletUseCase,
+    JwtPlayerVerifier,
     ReserveWalletBalanceUseCase,
     SettleWalletBetUseCase,
     RabbitMqWalletReservationConsumer,

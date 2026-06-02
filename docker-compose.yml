@@ -101,6 +101,9 @@ services:
     environment:
       PORT: 4001
       DATABASE_URL: postgresql://admin:admin@postgres:5432/games
+      KEYCLOAK_CLIENT_ID: crash-game-client
+      KEYCLOAK_ISSUER: http://localhost:8080/realms/crash-game
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/crash-game/protocol/openid-connect/certs
       RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672
     depends_on:
       postgres:
@@ -126,6 +129,9 @@ services:
     environment:
       PORT: 4002
       DATABASE_URL: postgresql://admin:admin@postgres:5432/wallets
+      KEYCLOAK_CLIENT_ID: crash-game-client
+      KEYCLOAK_ISSUER: http://localhost:8080/realms/crash-game
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/crash-game/protocol/openid-connect/certs
       RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672
     depends_on:
       postgres:

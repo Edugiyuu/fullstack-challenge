@@ -7,7 +7,7 @@
     "frontend"
   ],
   "scripts": {
-    "docker:up": "docker compose up --build",
+    "docker:up": "docker compose up --build --force-recreate",
     "docker:down": "docker compose down",
     "docker:prune": "docker compose down -v --rmi all --remove-orphans && docker volume prune -f"
   },

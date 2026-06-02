@@ -4,6 +4,7 @@ import { CashoutBetUseCase, type CashoutBetResult } from "../../application/use-
 import { PlaceBetUseCase, type PlaceBetResult } from "../../application/use-cases/place-bet.use-case";
 import { InvalidBetActionError, InvalidBetAmountError } from "../../domain/errors";
 import { Round } from "../../domain/entities/round";
+import { JwtPlayerVerifier } from "../auth/jwt-player";
 import { HealthCheckResponseDto } from "../dtos/health-check-response.dto";
 
 @Controller()
@@ -11,6 +12,7 @@ export class GamesController {
   constructor(
     private readonly currentRound: CurrentRoundService,
     private readonly cashoutBet: CashoutBetUseCase,
+    private readonly jwtPlayerVerifier: JwtPlayerVerifier,
     private readonly placeBet: PlaceBetUseCase,
   ) {}
 
@@ -27,12 +29,12 @@ export class GamesController {
 
   @Post("bet")
   async bet(
-    @Headers("x-player-id") playerIdHeader: string | undefined,
+    @Headers("authorization") authorizationHeader: string | undefined,
     @Body("amountCents") amountCents: string | undefined,
   ): Promise<PlaceBetResult> {
     try {
       return await this.placeBet.execute({
-        playerId: resolvePlayerId(playerIdHeader),
+        playerId: await this.jwtPlayerVerifier.resolvePlayerId(authorizationHeader),
         amountCents: parseAmountCents(amountCents),
       });
     } catch (error) {
@@ -45,10 +47,10 @@ export class GamesController {
   }
 
   @Post("bet/cashout")
-  async cashout(@Headers("x-player-id") playerIdHeader: string | undefined): Promise<CashoutBetResult> {
+  async cashout(@Headers("authorization") authorizationHeader: string | undefined): Promise<CashoutBetResult> {
     try {
       return await this.cashoutBet.execute({
-        playerId: resolvePlayerId(playerIdHeader),
+        playerId: await this.jwtPlayerVerifier.resolvePlayerId(authorizationHeader),
       });
     } catch (error) {
       if (error instanceof InvalidBetActionError || error instanceof InvalidBetAmountError) {
@@ -76,11 +78,6 @@ type CurrentRoundResponseDto = {
     status: string;
   }[];
 };
-
-function resolvePlayerId(playerIdHeader: string | undefined): string {
-  const playerId = playerIdHeader?.trim();
-  return playerId || "player";
-}
 
 function parseAmountCents(amountCents: string | undefined): bigint {
   if (!amountCents || !/^\d+$/.test(amountCents)) {
