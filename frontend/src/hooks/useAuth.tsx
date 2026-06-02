@@ -8,6 +8,7 @@ type AuthContextValue = {
   playerId: string;
   user: User | null;
   completeLogin: () => Promise<void>;
+  invalidateSession: () => Promise<void>;
   login: () => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -60,6 +61,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(loggedUser);
   }, []);
 
+  const invalidateSession = useCallback(async () => {
+    await authManager.removeUser();
+    setUser(null);
+  }, []);
+
   const logout = useCallback(async () => {
     const currentUser = await authManager.getUser();
 
@@ -76,6 +82,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return {
       completeLogin,
+      invalidateSession,
       isAuthenticated: Boolean(user && !user.expired),
       isLoading,
       login,
@@ -83,7 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       playerId: session.playerId,
       user,
     };
-  }, [completeLogin, isLoading, login, logout, user]);
+  }, [completeLogin, invalidateSession, isLoading, login, logout, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

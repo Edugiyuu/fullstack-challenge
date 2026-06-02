@@ -7,7 +7,7 @@ import { TopBar } from "../components/TopBar";
 import { useGameSocket } from "../hooks/useGameSocket";
 import { useAuth } from "../hooks/useAuth";
 import { useWallet } from "../hooks/useWallet";
-import { cashoutBet, getCurrentRound, placeBet } from "../lib/api";
+import { cashoutBet, getCurrentRound, isUnauthorizedApiError, placeBet } from "../lib/api";
 import type { BetResult, LiveBet, Round } from "../types/game";
 import { formatCurrency, toErrorMessage } from "../utils/format";
 import { calculatePayoutCents, toCentsString } from "../utils/money";
@@ -17,8 +17,8 @@ type GamePageProps = {
 };
 
 export function GamePage({ onLogout }: GamePageProps) {
-  const { logout, playerId } = useAuth();
-  const { ensureWallet, isLoading: isWalletLoading, refreshWallet, wallet } = useWallet();
+  const { invalidateSession, logout, playerId } = useAuth();
+  const { ensureWallet, error: walletError, isLoading: isWalletLoading, refreshWallet, wallet } = useWallet();
   const [round, setRound] = useState<Round | null>(null);
   const [betAmount, setBetAmount] = useState("100");
   const [autoCashout, setAutoCashout] = useState("2.00x");
@@ -34,15 +34,35 @@ export function GamePage({ onLogout }: GamePageProps) {
     setRound(currentRound);
   }, []);
 
+  const handleApiError = useCallback(
+    async (error: unknown) => {
+      if (isUnauthorizedApiError(error)) {
+        await invalidateSession();
+        setNotice("Sessao expirada. Faca login novamente.");
+        onLogout();
+        return;
+      }
+
+      setNotice(toErrorMessage(error));
+    },
+    [invalidateSession, onLogout],
+  );
+
   const delayedWalletRefresh = useCallback(async () => {
     await new Promise((resolve) => setTimeout(resolve, 900));
-    await refreshWallet();
-  }, [refreshWallet]);
+    try {
+      await refreshWallet();
+    } catch (error) {
+      await handleApiError(error);
+    }
+  }, [handleApiError, refreshWallet]);
 
   useEffect(() => {
-    void ensureWallet();
+    void ensureWallet().catch((error: unknown) => {
+      void handleApiError(error);
+    });
     void refreshRound();
-  }, [ensureWallet, refreshRound]);
+  }, [ensureWallet, handleApiError, refreshRound]);
 
   useGameSocket({
     delayedWalletRefresh,
@@ -73,7 +93,7 @@ export function GamePage({ onLogout }: GamePageProps) {
       setNotice("Aposta aceita. Aguardando reserva da carteira.");
       await delayedWalletRefresh();
     } catch (error) {
-      setNotice(toErrorMessage(error));
+      await handleApiError(error);
     } finally {
       setIsBetting(false);
     }
@@ -87,7 +107,7 @@ export function GamePage({ onLogout }: GamePageProps) {
       setNotice(`Cashout confirmado: ${formatCurrency(cashout.payoutCents)}.`);
       await delayedWalletRefresh();
     } catch (error) {
-      setNotice(toErrorMessage(error));
+      await handleApiError(error);
     } finally {
       setIsCashingOut(false);
     }
@@ -113,7 +133,13 @@ export function GamePage({ onLogout }: GamePageProps) {
 
   return (
     <main className="min-h-screen bg-black text-neutral-100">
-      <TopBar isWalletLoading={isWalletLoading} playerId={playerId} wallet={wallet} onLogout={handleLogout} />
+      <TopBar
+        isWalletLoading={isWalletLoading}
+        playerId={playerId}
+        wallet={wallet}
+        walletError={walletError}
+        onLogout={handleLogout}
+      />
       <section className="grid gap-5 bg-black p-4 md:p-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="grid gap-5">
           <FlightPanel round={round} />

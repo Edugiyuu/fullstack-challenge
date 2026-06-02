@@ -3,6 +3,20 @@ import { getAuthSession } from "./auth";
 import type { BetResult, CashoutResult, Round } from "../types/game";
 import type { Wallet } from "../types/wallet";
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export function isUnauthorizedApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError && error.status === 401;
+}
+
 export async function createWallet(): Promise<Wallet> {
   const response = await fetch(`${API_BASE_URL}/wallets`, {
     method: "POST",
@@ -58,8 +72,24 @@ async function parseJsonResponse<T>(response: Response): Promise<T> {
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(payload?.message ?? "Erro de rede");
+    throw new ApiError(toResponseMessage(payload), response.status);
   }
 
   return payload as T;
+}
+
+function toResponseMessage(payload: unknown): string {
+  if (payload && typeof payload === "object" && "message" in payload) {
+    const message = (payload as { message?: unknown }).message;
+
+    if (typeof message === "string") {
+      return message;
+    }
+
+    if (Array.isArray(message)) {
+      return message.join(", ");
+    }
+  }
+
+  return "Erro de rede";
 }
