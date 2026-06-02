@@ -18,7 +18,7 @@ type GamePageProps = {
 
 export function GamePage({ onLogout }: GamePageProps) {
   const { logout, playerId } = useAuth();
-  const { ensureWallet, refreshWallet, wallet } = useWallet();
+  const { ensureWallet, isLoading: isWalletLoading, refreshWallet, wallet } = useWallet();
   const [round, setRound] = useState<Round | null>(null);
   const [betAmount, setBetAmount] = useState("100");
   const [autoCashout, setAutoCashout] = useState("2.00x");
@@ -113,7 +113,7 @@ export function GamePage({ onLogout }: GamePageProps) {
 
   return (
     <main className="min-h-screen bg-black text-neutral-100">
-      <TopBar playerId={playerId} wallet={wallet} onLogout={handleLogout} />
+      <TopBar isWalletLoading={isWalletLoading} playerId={playerId} wallet={wallet} onLogout={handleLogout} />
       <section className="grid gap-5 bg-black p-4 md:p-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="grid gap-5">
           <FlightPanel round={round} />

@@ -39,6 +39,17 @@ export function FlightPanel({ round }: FlightPanelProps) {
     return `${remainingSeconds}s`;
   }, [now, round?.bettingEndsAt, status]);
 
+  const graph = useMemo(() => {
+    const progress = Math.min(1, Math.max(0, (multiplier - 100) / 500));
+    const endX = 18 + progress * 70;
+    const endY = 80 - Math.pow(progress, 1.35) * 58;
+
+    return {
+      pointX: endX,
+      pointY: endY,
+    };
+  }, [multiplier]);
+
   return (
     <section
       className="relative min-h-[320px] overflow-hidden rounded-lg border border-neutral-800 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.12),rgba(0,0,0,0)_34%),#020202] p-4 md:min-h-[480px]"
@@ -52,7 +63,36 @@ export function FlightPanel({ round }: FlightPanelProps) {
         <Clock3 size={16} />
         {timerLabel}
       </div>
-      <div className="flex h-full min-h-[288px] flex-col items-center justify-center md:min-h-[448px]">
+      <svg
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-full w-full opacity-80"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="flight-line" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stopColor={isRoundEnded ? "#7f1d1d" : "#14532d"} stopOpacity="0" />
+            <stop offset="55%" stopColor={isRoundEnded ? "#ef4444" : "#22c55e"} stopOpacity="0.82" />
+            <stop offset="100%" stopColor={isRoundEnded ? "#fb7185" : "#86efac"} stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        <path d="M 0 82 H 100" stroke="#262626" strokeWidth="0.35" />
+        <path d="M 10 22 V 88" stroke="#171717" strokeWidth="0.28" />
+        {[24, 38, 52, 66].map((x) => (
+          <path d={`M ${x} 22 V 88`} key={x} stroke="#171717" strokeWidth="0.18" />
+        ))}
+        {[34, 50, 66].map((y) => (
+          <path d={`M 10 ${y} H 92`} key={y} stroke="#171717" strokeWidth="0.18" />
+        ))}
+        <path
+          d={`M 10 82 L ${graph.pointX.toFixed(1)} ${graph.pointY.toFixed(1)}`}
+          fill="none"
+          stroke="url(#flight-line)"
+          strokeLinecap="round"
+          strokeWidth="1.2"
+        />
+      </svg>
+      <div className="relative z-10 flex h-full min-h-[288px] flex-col items-center justify-center md:min-h-[448px]">
         <div className={`text-6xl font-black md:text-8xl ${isRoundEnded ? "text-red-500" : "text-green-500"}`}>
           {formatMultiplier(multiplier)}
         </div>

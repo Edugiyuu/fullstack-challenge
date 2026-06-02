@@ -7,7 +7,7 @@ import { GAME_REALTIME_PUBLISHER, type GameRealtimePublisher } from "../ports/ga
 import { RequestWalletBetLostUseCase } from "../use-cases/request-wallet-bet-lost.use-case";
 
 const DEVELOPMENT_CLIENT_SEED = "development-client-seed";
-const BETTING_WINDOW_MS = 60_000;
+const BETTING_WINDOW_MS = 15_000;
 const ROUND_COOLDOWN_MS = 5_000;
 const MULTIPLIER_STEP_CENTS = 10;
 const TICK_MS = 200;

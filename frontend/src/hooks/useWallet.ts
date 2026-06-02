@@ -4,6 +4,7 @@ import type { Wallet } from "../types/wallet";
 
 export function useWallet() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const refreshWallet = useCallback(async () => {
     const currentWallet = await getWallet();
@@ -11,12 +12,18 @@ export function useWallet() {
   }, []);
 
   const ensureWallet = useCallback(async () => {
-    await createWallet();
-    await refreshWallet();
+    setIsLoading(true);
+    try {
+      await createWallet();
+      await refreshWallet();
+    } finally {
+      setIsLoading(false);
+    }
   }, [refreshWallet]);
 
   return {
     ensureWallet,
+    isLoading,
     refreshWallet,
     wallet,
   };

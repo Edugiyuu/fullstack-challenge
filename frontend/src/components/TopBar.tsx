@@ -4,12 +4,13 @@ import { formatCurrency } from "../utils/format";
 import { Brand } from "./Brand";
 
 type TopBarProps = {
+  isWalletLoading: boolean;
   playerId: string;
   wallet: Wallet | null;
   onLogout: () => void;
 };
 
-export function TopBar({ playerId, wallet, onLogout }: TopBarProps) {
+export function TopBar({ isWalletLoading, playerId, wallet, onLogout }: TopBarProps) {
   return (
     <header className="flex flex-col gap-4 bg-black px-5 py-4 md:flex-row md:items-center md:justify-between md:px-8">
       <Brand />
@@ -23,7 +24,10 @@ export function TopBar({ playerId, wallet, onLogout }: TopBarProps) {
         </button>
         <div className="flex items-center gap-2 rounded-lg border border-green-600 bg-green-950/20 px-4 py-2 text-sm text-neutral-200">
           <Banknote size={16} />
-          Saldo: <strong className="text-green-400">{formatCurrency(wallet?.balanceCents ?? "0")}</strong>
+          Saldo:{" "}
+          <strong className="min-w-24 text-green-400">
+            {isWalletLoading || !wallet ? "Carregando..." : formatCurrency(wallet.balanceCents)}
+          </strong>
         </div>
       </div>
     </header>
