@@ -8,6 +8,7 @@ export type RoundRealtimePayload = {
   status: string;
   crashPoint: number;
   currentMultiplier: number;
+  bettingEndsAt: string;
 };
 
 export type BetRealtimePayload = {
@@ -21,6 +22,7 @@ export type BetRealtimePayload = {
 };
 
 export interface GameRealtimePublisher {
+  publishRoundBetting(round: Round, currentMultiplier: number): void;
   publishRoundStarted(round: Round, currentMultiplier: number): void;
   publishRoundMultiplier(round: Round, currentMultiplier: number): void;
   publishRoundCrashed(round: Round, currentMultiplier: number, lostBets: readonly Bet[]): void;

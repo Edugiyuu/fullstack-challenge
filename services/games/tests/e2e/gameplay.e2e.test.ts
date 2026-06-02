@@ -11,6 +11,9 @@ type RoundResponse = {
   id: string;
   status: string;
   currentMultiplier: number;
+  bets: {
+    playerId: string;
+  }[];
 };
 
 type WalletResponse = {
@@ -89,7 +92,8 @@ async function getCurrentRound(): Promise<RoundResponse> {
 async function waitForBettingRound(): Promise<RoundResponse> {
   return poll(async () => {
     const round = await getCurrentRound();
-    return round.status === "BETTING" ? round : null;
+    const playerAlreadyBet = round.bets.some((bet) => bet.playerId === USERNAME);
+    return round.status === "BETTING" && !playerAlreadyBet ? round : null;
   }, 70_000);
 }
 

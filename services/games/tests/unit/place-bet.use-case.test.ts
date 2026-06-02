@@ -11,6 +11,10 @@ import { InvalidBetAmountError } from "../../src/domain/errors";
 class FakeGameRealtimePublisher implements GameRealtimePublisher {
   events: string[] = [];
 
+  publishRoundBetting(): void {
+    this.events.push("round:betting");
+  }
+
   publishRoundStarted(): void {
     this.events.push("round:started");
   }

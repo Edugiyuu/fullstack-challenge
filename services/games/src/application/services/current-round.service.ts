@@ -8,6 +8,7 @@ import { RequestWalletBetLostUseCase } from "../use-cases/request-wallet-bet-los
 
 const DEVELOPMENT_CLIENT_SEED = "development-client-seed";
 const BETTING_WINDOW_MS = 60_000;
+const ROUND_COOLDOWN_MS = 5_000;
 const MULTIPLIER_STEP_CENTS = 10;
 const TICK_MS = 200;
 
@@ -18,6 +19,7 @@ export class CurrentRoundService implements OnModuleDestroy {
   private currentMultiplier = 100;
   private nextNonce = 1;
   private startTimer?: ReturnType<typeof setTimeout>;
+  private nextRoundTimer?: ReturnType<typeof setTimeout>;
   private ticker?: ReturnType<typeof setInterval>;
 
   constructor(
@@ -29,6 +31,7 @@ export class CurrentRoundService implements OnModuleDestroy {
   ) {}
 
   onModuleDestroy(): void {
+    this.stopNextRoundTimer();
     this.stopStartTimer();
     this.stopTicker();
   }
@@ -38,7 +41,7 @@ export class CurrentRoundService implements OnModuleDestroy {
   }
 
   getCurrentRoundState(): { round: Round; currentMultiplier: number } {
-    if (!this.currentRound || this.currentRound.status === RoundStatus.SETTLED) {
+    if (!this.currentRound) {
       this.currentRound = this.createDevelopmentRound();
       this.currentMultiplier = 100;
       this.scheduleCurrentRoundStart();
@@ -114,10 +117,30 @@ export class CurrentRoundService implements OnModuleDestroy {
     this.startTimer = setTimeout(() => this.startCurrentRound(), delayMs);
   }
 
+  private scheduleNextRound(): void {
+    this.stopNextRoundTimer();
+    this.nextRoundTimer = setTimeout(() => this.openNextRound(), ROUND_COOLDOWN_MS);
+  }
+
+  private openNextRound(): void {
+    this.nextRoundTimer = undefined;
+    this.currentRound = this.createDevelopmentRound();
+    this.currentMultiplier = 100;
+    this.gameRealtime?.publishRoundBetting(this.currentRound, this.currentMultiplier);
+    this.scheduleCurrentRoundStart();
+  }
+
   private stopStartTimer(): void {
     if (this.startTimer) {
       clearTimeout(this.startTimer);
       this.startTimer = undefined;
+    }
+  }
+
+  private stopNextRoundTimer(): void {
+    if (this.nextRoundTimer) {
+      clearTimeout(this.nextRoundTimer);
+      this.nextRoundTimer = undefined;
     }
   }
 
@@ -147,9 +170,7 @@ export class CurrentRoundService implements OnModuleDestroy {
       this.gameRealtime?.publishRoundSettled(round, this.currentMultiplier);
       this.stopTicker();
       await this.publishLostBets(lostBets);
-      this.currentRound = this.createDevelopmentRound();
-      this.currentMultiplier = 100;
-      this.scheduleCurrentRoundStart();
+      this.scheduleNextRound();
     }
   }
 

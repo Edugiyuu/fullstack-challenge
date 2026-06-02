@@ -24,6 +24,10 @@ export class GameEventsGateway implements GameRealtimePublisher, OnGatewayConnec
     this.logger.log(`WebSocket client connected: ${client.id}`);
   }
 
+  publishRoundBetting(round: Round, currentMultiplier: number): void {
+    this.emit("round:betting", toRoundPayload(round, currentMultiplier));
+  }
+
   publishRoundStarted(round: Round, currentMultiplier: number): void {
     this.emit("round:started", toRoundPayload(round, currentMultiplier));
   }
@@ -66,6 +70,7 @@ function toRoundPayload(round: Round, currentMultiplier: number): RoundRealtimeP
     status: round.status,
     crashPoint: round.crashPoint,
     currentMultiplier,
+    bettingEndsAt: round.bettingEndsAt.toISOString(),
   };
 }
 

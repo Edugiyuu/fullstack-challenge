@@ -19,6 +19,7 @@ type RoundRealtimePayload = {
   status: string;
   crashPoint: number;
   currentMultiplier: number;
+  bettingEndsAt?: string;
 };
 
 export function useGameSocket({
@@ -35,6 +36,11 @@ export function useGameSocket({
     });
 
     socket.on("connect", () => setNotice("Tempo real conectado."));
+    socket.on("round:betting", (payload: RoundRealtimePayload) => {
+      setRound((current) => mergeRoundPayload(current, payload));
+      setLiveBets([]);
+      setNotice("Nova rodada aberta.");
+    });
     socket.on("round:started", (payload: RoundRealtimePayload) => {
       setRound((current) => mergeRoundPayload(current, payload));
       setNotice("Rodada em andamento.");
@@ -89,7 +95,7 @@ function mergeRoundPayload(current: Round | null, payload: RoundRealtimePayload)
     status: payload.status,
     crashPoint: payload.crashPoint,
     currentMultiplier: payload.currentMultiplier,
-    bettingEndsAt: current?.id === payload.roundId ? current.bettingEndsAt : undefined,
+    bettingEndsAt: payload.bettingEndsAt ?? (current?.id === payload.roundId ? current.bettingEndsAt : undefined),
     bets: current?.id === payload.roundId ? current.bets : [],
   };
 }

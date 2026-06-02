@@ -4,7 +4,6 @@ import { FlightPanel } from "../components/FlightPanel";
 import { HistoryPanel } from "../components/HistoryPanel";
 import { LiveBetsPanel } from "../components/LiveBetsPanel";
 import { TopBar } from "../components/TopBar";
-import { initialHistory, initialLiveBets } from "../data/mock-game";
 import { useGameSocket } from "../hooks/useGameSocket";
 import { useAuth } from "../hooks/useAuth";
 import { useWallet } from "../hooks/useWallet";
@@ -24,8 +23,8 @@ export function GamePage({ onLogout }: GamePageProps) {
   const [betAmount, setBetAmount] = useState("100");
   const [autoCashout, setAutoCashout] = useState("2.00x");
   const [activeBet, setActiveBet] = useState<BetResult | null>(null);
-  const [liveBets, setLiveBets] = useState<LiveBet[]>(initialLiveBets);
-  const [history, setHistory] = useState<number[]>(initialHistory);
+  const [liveBets, setLiveBets] = useState<LiveBet[]>([]);
+  const [history, setHistory] = useState<number[]>([]);
   const [notice, setNotice] = useState("Voce pode apostar durante a fase de apostas. Cash out antes do crash!");
   const [isBetting, setIsBetting] = useState(false);
   const [isCashingOut, setIsCashingOut] = useState(false);
