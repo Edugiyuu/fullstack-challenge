@@ -22,7 +22,6 @@ export function GamePage({ onLogout }: GamePageProps) {
   const { ensureWallet, error: walletError, isLoading: isWalletLoading, refreshWallet, wallet } = useWallet();
   const [round, setRound] = useState<Round | null>(null);
   const [betAmount, setBetAmount] = useState("100");
-  const [autoCashout, setAutoCashout] = useState("2.00x");
   const [activeBet, setActiveBet] = useState<BetResult | null>(null);
   const [liveBets, setLiveBets] = useState<LiveBet[]>([]);
   const [history, setHistory] = useState<number[]>([]);
@@ -174,7 +173,6 @@ export function GamePage({ onLogout }: GamePageProps) {
         <div className="grid gap-5">
           <FlightPanel round={round} />
           <BetControls
-            autoCashout={autoCashout}
             betAmount={betAmount}
             betWarning={betWarning}
             canCashout={canCashout}
@@ -184,7 +182,6 @@ export function GamePage({ onLogout }: GamePageProps) {
             noticeTone={noticeTone}
             possiblePayout={possiblePayout}
             roundStatus={round?.status}
-            onAutoCashoutChange={setAutoCashout}
             onBet={handleBet}
             onBetAmountChange={setBetAmount}
             onCashout={handleCashout}

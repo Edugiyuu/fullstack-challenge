@@ -37,14 +37,11 @@ export function useBetResultAnimation({ resultId, tone, onComplete }: BetResultA
 
       const jackpotItems = jackpotRefs.current.filter(Boolean);
       const jackpotReels = jackpotReelRefs.current.filter(Boolean);
-      const accent = tone === "win" ? "#22c55e" : "#ef4444";
 
       gsap.set(root, { autoAlpha: 0 });
       gsap.set(card, { y: 18, scale: 0.92, rotate: tone === "win" ? -1.5 : 1.5 });
       gsap.set(title, { scale: 0.72 });
       gsap.set(glow, { scale: 0.55, opacity: 0 });
-      gsap.set(jackpotItems, { autoAlpha: 0, y: 8, scale: 0.96 });
-      gsap.set(jackpotReels, { yPercent: 0, filter: "blur(0px)" });
 
       const timeline = gsap.timeline({ onComplete });
       timeline
@@ -69,14 +66,12 @@ export function useBetResultAnimation({ resultId, tone, onComplete }: BetResultA
         );
 
         jackpotReels.forEach((reel, index) => {
-          const startAt = 0.34 + index * 0.3;
+          const startAt = 0.34 + index * 0.7;
 
           timeline
-            .to(
-              reel,
-              {
+            .to(reel, {
                 yPercent: -140,
-                filter: "blur(0.5px)",
+                filter: "blur(1px)",
                 duration: 0.34,
                 ease: "power1.in",
               },
@@ -87,16 +82,15 @@ export function useBetResultAnimation({ resultId, tone, onComplete }: BetResultA
               filter: "blur(0px)",
               duration: 0.18,
               ease: "back.out(1.7)",
+              yoyo: true,
             });
 
-          timeline.to(
-            jackpotItems[index],
-            {
+          timeline.to(jackpotItems[index],{
               scale: 1.1,
               duration: 0.08,
-              
               repeat: 1,
               ease: "power1.out",
+              yoyo: true,
             },
             startAt + 0.42,
           );

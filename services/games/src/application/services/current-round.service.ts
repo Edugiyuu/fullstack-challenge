@@ -9,9 +9,9 @@ import { RequestWalletBetLostUseCase } from "../use-cases/request-wallet-bet-los
 const DEVELOPMENT_CLIENT_SEED = "development-client-seed";
 const BETTING_WINDOW_MS = 15_000;
 const ROUND_COOLDOWN_MS = 5_000;
-const MULTIPLIER_STEP_CENTS = 10;
+const MULTIPLIER_STEP_CENTS = 5;
 const TICK_MS = 200;
-const VERIFY_HISTORY_LIMIT = 20;
+const VERIFY_HISTORY_LIMIT = 22;
 
 @Injectable()
 export class CurrentRoundService implements OnModuleDestroy {
