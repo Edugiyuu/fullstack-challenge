@@ -13,7 +13,7 @@ export function useBetResultAnimation({ resultId, tone, onComplete }: BetResultA
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const glowRef = useRef<HTMLDivElement | null>(null);
   const jackpotRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const particleRefs = useRef<Array<SVGSVGElement | null>>([]);
+  const jackpotReelRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -35,17 +35,16 @@ export function useBetResultAnimation({ resultId, tone, onComplete }: BetResultA
         return;
       }
 
-      const particles = particleRefs.current.filter(Boolean);
       const jackpotItems = jackpotRefs.current.filter(Boolean);
+      const jackpotReels = jackpotReelRefs.current.filter(Boolean);
       const accent = tone === "win" ? "#22c55e" : "#ef4444";
-      const drift = tone === "win" ? -56 : 42;
 
       gsap.set(root, { autoAlpha: 0 });
       gsap.set(card, { y: 18, scale: 0.92, rotate: tone === "win" ? -1.5 : 1.5 });
       gsap.set(title, { scale: 0.72 });
       gsap.set(glow, { scale: 0.55, opacity: 0 });
-      gsap.set(jackpotItems, { autoAlpha: 0, y: -24, scale: 0.84, rotate: -3 });
-      gsap.set(particles, { autoAlpha: 0, color: accent, scale: 0.35 });
+      gsap.set(jackpotItems, { autoAlpha: 0, y: 8, scale: 0.96 });
+      gsap.set(jackpotReels, { yPercent: 0, filter: "blur(0px)" });
 
       const timeline = gsap.timeline({ onComplete });
       timeline
@@ -62,13 +61,46 @@ export function useBetResultAnimation({ resultId, tone, onComplete }: BetResultA
             autoAlpha: 1,
             y: 0,
             scale: 1,
-            rotate: 0,
-            stagger: 0.12,
-            duration: 0.34,
-            ease: "back.out(2.2)",
+            duration: 0.18,
+            ease: "power2.out",
+            stagger: 0.1,
           },
-          0.32,
+          0.26,
         );
+
+        jackpotReels.forEach((reel, index) => {
+          const startAt = 0.34 + index * 0.3;
+
+          timeline
+            .to(
+              reel,
+              {
+                yPercent: -140,
+                filter: "blur(0.5px)",
+                duration: 0.34,
+                ease: "power1.in",
+              },
+              startAt,
+            )
+            .to(reel, {
+              yPercent: -85.714,
+              filter: "blur(0px)",
+              duration: 0.18,
+              ease: "back.out(1.7)",
+            });
+
+          timeline.to(
+            jackpotItems[index],
+            {
+              scale: 1.1,
+              duration: 0.08,
+              
+              repeat: 1,
+              ease: "power1.out",
+            },
+            startAt + 0.42,
+          );
+        });
       }
 
       if (tone === "lose") {
@@ -78,36 +110,10 @@ export function useBetResultAnimation({ resultId, tone, onComplete }: BetResultA
         });
       }
 
-      particles.forEach((particle, index) => {
-        const side = index % 2 === 0 ? -1 : 1;
-        const distance = 34 + index * 7;
-        timeline.to(
-          particle,
-          {
-            autoAlpha: 0.85,
-            x: side * distance,
-            y: drift - index * 5,
-            scale: 1,
-            duration: 0.52,
-            ease: "power2.out",
-          },
-          0.12 + index * 0.025,
-        );
-        timeline.to(
-          particle,
-          {
-            autoAlpha: 0,
-            scale: 0.2,
-            duration: 0.35,
-            ease: "power1.in",
-          },
-          0.62 + index * 0.025,
-        );
-      });
 
       timeline
         .to(glow, { opacity: 0.25, scale: 1.35, duration: 1.25, ease: "sine.inOut" }, "<")
-        .to(root, { autoAlpha: 0, duration: 0.28, ease: "power1.in" }, 2.35);
+        .to(root, { autoAlpha: 0, duration: 0.28, ease: "power1.in" }, 4);
     }, root);
 
     return () => ctx.revert();
@@ -117,7 +123,7 @@ export function useBetResultAnimation({ resultId, tone, onComplete }: BetResultA
     cardRef,
     glowRef,
     jackpotRefs,
-    particleRefs,
+    jackpotReelRefs,
     rootRef,
     titleRef,
   };
