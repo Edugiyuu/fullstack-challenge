@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BetControls } from "../components/BetControls";
+import { BetResultOverlay, type BetResultOverlayState } from "../components/BetResultOverlay";
 import { FlightPanel } from "../components/FlightPanel";
 import { HistoryPanel } from "../components/HistoryPanel";
 import { LiveBetsPanel } from "../components/LiveBetsPanel";
@@ -28,6 +29,7 @@ export function GamePage({ onLogout }: GamePageProps) {
   const [notice, setNotice] = useState("Voce pode apostar durante a fase de apostas. Cash out antes do crash!");
   const [isBetting, setIsBetting] = useState(false);
   const [isCashingOut, setIsCashingOut] = useState(false);
+  const [betResult, setBetResult] = useState<BetResultOverlayState | null>(null);
 
   const refreshRound = useCallback(async () => {
     const currentRound = await getCurrentRound();
@@ -57,6 +59,26 @@ export function GamePage({ onLogout }: GamePageProps) {
     }
   }, [handleApiError, refreshWallet]);
 
+  const showBetResult = useCallback((result: Omit<BetResultOverlayState, "id">) => {
+    setBetResult((current) => ({
+      ...result,
+      id: (current?.id ?? 0) + 1,
+    }));
+  }, []);
+
+  const handlePlayerLost = useCallback(
+    ({ crashMultiplier }: { crashMultiplier: number }) => {
+      showBetResult({
+        type: "LOSE",
+        multiplier: crashMultiplier,
+      });
+    },
+    [showBetResult],
+  );
+  const clearBetResult = useCallback(() => {
+    setBetResult(null);
+  }, []);
+
   useEffect(() => {
     void ensureWallet().catch((error: unknown) => {
       void handleApiError(error);
@@ -65,7 +87,9 @@ export function GamePage({ onLogout }: GamePageProps) {
   }, [ensureWallet, handleApiError, refreshRound]);
 
   useGameSocket({
+    activeBet,
     delayedWalletRefresh,
+    onPlayerLost: handlePlayerLost,
     setActiveBet,
     setHistory,
     setLiveBets,
@@ -103,6 +127,11 @@ export function GamePage({ onLogout }: GamePageProps) {
     setIsCashingOut(true);
     try {
       const cashout = await cashoutBet();
+      showBetResult({
+        type: "WIN",
+        multiplier: cashout.cashoutMultiplier,
+        payoutCents: cashout.payoutCents,
+      });
       setActiveBet(null);
       setNotice(`Cashout confirmado: ${formatCurrency(cashout.payoutCents)}.`);
       await delayedWalletRefresh();
@@ -133,6 +162,7 @@ export function GamePage({ onLogout }: GamePageProps) {
 
   return (
     <main className="min-h-screen bg-black text-neutral-100">
+      {betResult && <BetResultOverlay result={betResult} onDone={clearBetResult} />}
       <TopBar
         isWalletLoading={isWalletLoading}
         playerId={playerId}

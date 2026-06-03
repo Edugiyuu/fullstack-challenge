@@ -1,12 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { io } from "socket.io-client";
 import { WS_URL } from "../lib/config";
-import type { LiveBet, Round } from "../types/game";
+import type { BetResult, LiveBet, Round } from "../types/game";
 import { formatMultiplier } from "../utils/format";
 
 type UseGameSocketParams = {
+  activeBet: BetResult | null;
   delayedWalletRefresh: () => Promise<void>;
+  onPlayerLost: (payload: { crashMultiplier: number }) => void;
   setActiveBet: (bet: null) => void;
   setHistory: Dispatch<SetStateAction<number[]>>;
   setLiveBets: Dispatch<SetStateAction<LiveBet[]>>;
@@ -23,13 +25,21 @@ type RoundRealtimePayload = {
 };
 
 export function useGameSocket({
+  activeBet,
   delayedWalletRefresh,
+  onPlayerLost,
   setActiveBet,
   setHistory,
   setLiveBets,
   setNotice,
   setRound,
 }: UseGameSocketParams) {
+  const activeBetRef = useRef<BetResult | null>(activeBet);
+
+  useEffect(() => {
+    activeBetRef.current = activeBet;
+  }, [activeBet]);
+
   useEffect(() => {
     const socket = io(WS_URL, {
       transports: ["websocket"],
@@ -58,6 +68,17 @@ export function useGameSocket({
       );
       setHistory((current) => [payload.currentMultiplier, ...current].slice(0, 18));
       setNotice(`Crash em ${formatMultiplier(payload.currentMultiplier)}.`);
+      const playerActiveBet = activeBetRef.current;
+      const activeBetWasLost =
+        Boolean(playerActiveBet) &&
+        playerActiveBet?.roundId === payload.roundId &&
+        (!payload.lostBets?.length ||
+          payload.lostBets.some((lostBet) => lostBet.betId === playerActiveBet.betId || lostBet.id === playerActiveBet.betId));
+
+      if (activeBetWasLost) {
+        onPlayerLost({ crashMultiplier: payload.currentMultiplier });
+      }
+
       setActiveBet(null);
       void delayedWalletRefresh();
     });
@@ -86,7 +107,7 @@ export function useGameSocket({
     return () => {
       socket.disconnect();
     };
-  }, [delayedWalletRefresh, setActiveBet, setHistory, setLiveBets, setNotice, setRound]);
+  }, [delayedWalletRefresh, onPlayerLost, setActiveBet, setHistory, setLiveBets, setNotice, setRound]);
 }
 
 function mergeRoundPayload(current: Round | null, payload: RoundRealtimePayload): Round {
